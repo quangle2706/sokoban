@@ -3,8 +3,8 @@
 An original, cozy, top-down Sokoban-style puzzle game for the web.
 Push every crate onto a goal. All player-facing text is Vietnamese.
 
-**Play:** <https://quangle2706.github.io/sokoban/> (live once GitHub Pages
-is enabled for the repo; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)).
+**Play:** <https://quangle2706.github.io/sokoban/>. It is deployed to GitHub
+Pages automatically from `main`; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 **Status: Milestone 4 (MVP complete).**
 - Ten original levels with verified solutions.

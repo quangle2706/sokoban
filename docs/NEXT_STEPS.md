@@ -8,8 +8,7 @@
   (real-device and screen-reader checks are listed as open in
   [ACCESSIBILITY.md](ACCESSIBILITY.md))
 - [x] **4. Static deployment preparation and demo recording**
-  (deployment is ready and the demo is recorded; going live needs the
-  one-time Pages setting; see below)
+  (live at https://quangle2706.github.io/sokoban/, deployed by CI from `main`)
 
 ## Milestone 4 outcome
 
@@ -31,8 +30,8 @@ Done:
 - **Demo:** recorded as `docs/media/demo.gif` and shown in the README.
 
 Still to do (needs the repository owner or a device):
-1. **Enable GitHub Pages:** Settings → Pages → Source: "GitHub Actions".
-   Then check the live URL with the release checklist in DEPLOYMENT.md.
+1. ~~Enable GitHub Pages~~: done. The site went live on 2026-11-12; the
+   first two runs failed only because Pages was not enabled yet.
 2. **Real-device and screen-reader pass:** see the open list in
    ACCESSIBILITY.md.
 3. **Choose a licence:** the repo has none yet, which means "all rights
