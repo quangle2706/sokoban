@@ -3,11 +3,23 @@
 An original, cozy, top-down Sokoban-style puzzle game for the web.
 Push every crate onto a goal. All player-facing text is Vietnamese.
 
-**Status: Milestone 3.** Ten original levels with verified solutions, a
-Home screen, level picker with unlocks, how-to page, and settings for sound,
-reduced motion and resetting progress. Sound effects are synthesized in the
-browser, with no audio files. Progress is saved in this browser, including
-unfinished runs with their undo history. See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
+**Play:** <https://quangle2706.github.io/sokoban/> (live once GitHub Pages
+is enabled for the repo; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)).
+
+**Status: Milestone 4 (MVP complete).**
+- Ten original levels with verified solutions.
+- Home screen, level picker with unlocks, how-to page, and settings for
+  sound, reduced motion and resetting progress.
+- Sound effects are synthesized in the browser, with no audio files.
+- Progress is saved in this browser, including unfinished runs with their
+  undo history.
+- Installable, and playable offline after the first visit.
+
+See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
+
+| Home | Gameplay | Level picker |
+| ---- | -------- | ------------ |
+| ![Home screen](docs/media/home.jpg) | ![Gameplay on level 7](docs/media/gameplay.jpg) | ![Level picker](docs/media/level-select.jpg) |
 
 ## Requirements
 
@@ -26,6 +38,7 @@ npm run build        # typecheck + production build into dist/
 npm run preview      # serve the production build locally
 node scripts/solve.ts                  # author tool: push-optimal search, all levels
 node scripts/solve.ts --moves goc-kho  # move-optimal search for one level
+node scripts/make-icons.ts             # author tool: regenerate public/icons/
 ```
 
 ## Controls
@@ -58,7 +71,9 @@ src/
   audio/    synthesized sound effects (Web Audio API, no files)
   app/      App (screens, levels, saving) + GameController (input -> engine -> view)
 tests/      Vitest suites + author-only solutions (tests/fixtures)
-scripts/    author tools (BFS solver)
+scripts/    author tools (BFS solver, icon generator)
+public/     static files copied as-is: icons, manifest, service worker, _headers
+.github/    CI: test + build on every push/PR, deploy main to GitHub Pages
 docs/       rules, architecture, next steps
 ```
 
@@ -66,5 +81,13 @@ docs/       rules, architecture, next steps
 
 - [docs/GAME_RULES.md](docs/GAME_RULES.md) — rules, counters, level format
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — module boundaries and data flow
+- [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) — GitHub Pages, other hosts, offline support, release checklist
+- [docs/DEMO.md](docs/DEMO.md) — demo recording shot list
 - [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) — what was checked, and what still needs real devices
 - [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) — roadmap and known limitations
+
+## Credits
+
+Game design, levels, code, graphics and sounds are original and generated
+in code. The project uses no third-party art, audio or fonts. Dependencies:
+Phaser, Vite, Vitest and TypeScript (see `package.json`).

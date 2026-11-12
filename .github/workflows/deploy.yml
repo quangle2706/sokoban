@@ -1,0 +1,59 @@
+# Test + build on every push and pull request; deploy to GitHub Pages only
+# from `main`. One-time setup: repository Settings → Pages → Source:
+# "GitHub Actions" (see docs/DEPLOYMENT.md).
+name: Test, build and deploy
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never run two deployments at once; let an in-flight deploy finish.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Install (exact versions from package-lock.json)
+        run: npm ci
+
+      - name: Unit tests
+        run: npm test
+
+      - name: Type check and production build
+        run: npm run build
+
+      - name: Upload site artifact
+        if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: dist
+
+  deploy:
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/configure-pages@v6
+      - id: deployment
+        uses: actions/deploy-pages@v5

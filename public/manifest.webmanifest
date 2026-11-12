@@ -1,0 +1,20 @@
+{
+  "name": "Kho Nhỏ",
+  "short_name": "Kho Nhỏ",
+  "description": "Trò chơi xếp thùng hàng ấm cúng: đẩy từng thùng về đúng chỗ.",
+  "lang": "vi",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#F5EFE4",
+  "theme_color": "#F5EFE4",
+  "categories": ["games", "puzzle"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

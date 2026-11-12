@@ -11,6 +11,20 @@ import { InputController } from './ui/input.ts';
 import { MotionSetting } from './ui/motion.ts';
 import './styles.css';
 
+// --- Startup safety net -----------------------------------------------------
+// The splash and its watchdog live inline in index.html, so they also work
+// when this bundle fails to load. Here we only report success or failure.
+const startup = (window as unknown as { __khoNhoStartup?: { done(): void; fail(): void } }).__khoNhoStartup;
+
+// Offline support in production builds only (a dev server must never be cached).
+if (import.meta.env.PROD && 'serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('./sw.js').catch(() => {
+      // Offline play is a bonus; the game works without it.
+    });
+  });
+}
+
 // Bundled levels are validated by the test suite; parsing here only fails on
 // a broken build, so failing loudly is right.
 const levels = LEVELS.map((def) => ({ def, level: parseLevelOrThrow(def.map) }));
@@ -33,6 +47,7 @@ function start(view: BoardView): void {
   const input = new InputController((command) => app.handleCommand(command), document.body);
   app.attachInput(input);
   app.start();
+  startup?.done();
 
   if (import.meta.env.DEV) {
     // Debug handle for manual/browser checks. Not present in production builds.
@@ -40,17 +55,23 @@ function start(view: BoardView): void {
   }
 }
 
-const game = new Phaser.Game({
-  type: Phaser.AUTO,
-  parent: boardHost,
-  transparent: true,
-  antialias: true,
-  banner: false,
-  audio: { noAudio: true },
-  input: { keyboard: false, mouse: false, touch: false, gamepad: false },
-  scale: { mode: Phaser.Scale.NONE, width: 1, height: 1 },
-  scene: new BoardScene(start, reducedMotion),
-});
+let game: Phaser.Game;
+try {
+  game = new Phaser.Game({
+    type: Phaser.AUTO,
+    parent: boardHost,
+    transparent: true,
+    antialias: true,
+    banner: false,
+    audio: { noAudio: true },
+    input: { keyboard: false, mouse: false, touch: false, gamepad: false },
+    scale: { mode: Phaser.Scale.NONE, width: 1, height: 1 },
+    scene: new BoardScene(start, reducedMotion),
+  });
+} catch (error) {
+  startup?.fail();
+  throw error;
+}
 
 /**
  * Keep the canvas exactly the size of its host, at device-pixel resolution

@@ -4,11 +4,33 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#F5EFE4" />
-    <meta name="description" content="Kho Nhỏ — trò chơi xếp thùng hàng ấm cúng." />
-    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='4' y='4' width='24' height='24' rx='5' fill='%23B97B46' stroke='%237A4E2A' stroke-width='2'/%3E%3Cpath d='M9 9l14 14M23 9L9 23' stroke='%237A4E2A' stroke-width='2'/%3E%3C/svg%3E" />
+    <meta name="color-scheme" content="light" />
+    <meta name="description" content="Kho Nhỏ — trò chơi xếp thùng hàng ấm cúng: đẩy từng thùng về đúng chỗ." />
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+    <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png" />
+    <link rel="manifest" href="manifest.webmanifest" />
     <title>Kho Nhỏ</title>
+    <!-- Critical styles for the splash, shown before the JS bundle (with Phaser) arrives. -->
+    <style>
+      html, body { margin: 0; background: #f5efe4; color: #292524; font-family: system-ui, sans-serif; }
+      .splash { position: fixed; inset: 0; z-index: 10; display: grid; place-content: center; gap: 12px;
+        padding: 24px; background: #f5efe4; text-align: center; }
+      .splash__title { margin: 0; font-size: 2rem; font-weight: 800; }
+      .splash__text { margin: 0; color: #57534e; }
+      .splash[hidden] { display: none; }
+    </style>
+    <noscript><style>#splash-text { display: none; }</style></noscript>
   </head>
   <body>
+    <div id="splash" class="splash" role="status">
+      <p class="splash__title">Kho Nhỏ</p>
+      <p id="splash-text" class="splash__text">Đang tải…</p>
+      <noscript>
+        <p class="splash__text">Kho Nhỏ cần bật JavaScript để chơi. Hãy bật JavaScript trong trình duyệt rồi tải lại trang.</p>
+      </noscript>
+    </div>
+
     <!-- ================= Gameplay ================= -->
     <div class="app">
       <header class="hud">
@@ -225,6 +247,45 @@
 
     <div id="announcer" class="sr-only" aria-live="polite"></div>
 
+    <!--
+      Startup watchdog. It is inline (not in the bundle) so it still works when
+      the bundle itself fails to download. main.ts calls __khoNhoStartup.done()
+      once the game is running; until then a script/stylesheet load error, a
+      runtime error, or 20 s without starting shows a friendly message.
+    -->
+    <script>
+      (function () {
+        var state = { started: false };
+        function fail() {
+          if (state.started) return;
+          var splash = document.getElementById('splash');
+          var text = document.getElementById('splash-text');
+          if (!splash || !text) return;
+          splash.hidden = false;
+          text.textContent =
+            'Không khởi động được trò chơi trên trình duyệt này. Hãy tải lại trang, hoặc thử một trình duyệt khác mới hơn.';
+        }
+        var timer = setTimeout(fail, 20000);
+        window.addEventListener(
+          'error',
+          function (event) {
+            var target = event.target;
+            var isResource = target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK');
+            if (isResource || event instanceof ErrorEvent) fail();
+          },
+          true,
+        );
+        window.addEventListener('unhandledrejection', fail);
+        window.__khoNhoStartup = {
+          fail: fail,
+          done: function () {
+            state.started = true;
+            clearTimeout(timer);
+            document.getElementById('splash').hidden = true;
+          },
+        };
+      })();
+    </script>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

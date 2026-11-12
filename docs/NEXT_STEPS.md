@@ -7,31 +7,50 @@
 - [x] **3. Home/settings, sound, motion polish, accessibility and responsive testing**
   (real-device and screen-reader checks are listed as open in
   [ACCESSIBILITY.md](ACCESSIBILITY.md))
-- [ ] **4. Static deployment preparation and demo recording**
+- [x] **4. Static deployment preparation and demo recording**
+  (deployment is ready; going live needs the one-time Pages setting, and
+  the demo needs recording; see below)
 
-## Milestone 4 plan
+## Milestone 4 outcome
 
-1. **Static hosting:** `npm run build` already produces a self-contained
-   `dist/` with relative paths (`base: './'`). Pick a host (GitHub Pages,
-   Netlify or Cloudflare Pages) and add a deploy workflow that runs
-   `npm ci`, `npm test` and `npm run build` before publishing.
-2. **Production polish:**
-   - App icons and a web manifest (installable, offline-friendly). Decide
-     whether a service worker is worth it.
-   - A `<noscript>` message.
-   - An error fallback if WebGL/Canvas fails.
-   - Check cache headers for hashed assets.
-3. **Bundle size:** the Phaser chunk is about 1.37 MB (357 kB gzipped).
-   Measure first load on a slow connection, then consider a custom Phaser
-   build or lazy-loading Phaser behind the Home screen.
-4. **Real-device pass:** work through the "Not yet verified" list in
-   ACCESSIBILITY.md on real phones and with a screen reader.
-5. **Demo recording:** a short capture showing a level start, push, undo, a
-   win with the celebration, the level picker, and settings with reduced
-   motion.
-6. **README:** add the live URL, a screenshot, and a short credits/licence
-   section. All assets are procedural, so there are no third-party assets
-   to credit.
+Done:
+- **CI/CD:** a GitHub Actions workflow tests and builds every push and PR,
+  and deploys `main` to GitHub Pages.
+- **Production polish:**
+  - Inline loading splash with a startup watchdog that also covers a failed
+    bundle download.
+  - `<noscript>` message.
+  - Web manifest with procedural icons, including a maskable icon and an
+    Apple touch icon.
+  - Service worker for offline play.
+  - `_headers` for Netlify and Cloudflare.
+- **Bundle measured:** about 370 kB gzipped in total, of which Phaser is
+  about 352 kB. Not optimised yet; see below.
+- **Docs:** [DEPLOYMENT.md](DEPLOYMENT.md), [DEMO.md](DEMO.md) (shot
+  list), README screenshots and credits.
+
+Still to do (needs the repository owner or a device):
+1. **Enable GitHub Pages:** Settings → Pages → Source: "GitHub Actions".
+   Then check the live URL with the release checklist in DEPLOYMENT.md.
+2. **Record the demo** following DEMO.md and save it as
+   `docs/media/demo.gif`.
+3. **Real-device and screen-reader pass:** see the open list in
+   ACCESSIBILITY.md.
+4. **Choose a licence:** the repo has none yet, which means "all rights
+   reserved" by default. Add a `LICENSE` file if others should be able to
+   reuse the code.
+
+## Ideas after the MVP
+
+- **Smaller first load:** a custom Phaser build, or rendering the board
+  without Phaser at all. The board is simple shapes and tweens, which a
+  plain `<canvas>` renderer behind the existing `BoardView` interface could
+  handle in a few kB.
+- **More content:** more levels, with `scripts/solve.ts` proving each one.
+- **Undoable restart** (exercise from Milestone 1) and a move-history replay
+  of your best run.
+- **Deadlock hints** (optional): gently mark crates that can no longer reach
+  a goal.
 
 ## Known limitations / ideas
 
@@ -53,6 +72,10 @@
 
 - **Milestone 1:** make restart undoable.
 - **Milestone 2:** show the best run in the HUD on completed levels.
+- **Milestone 4:** write a second `BoardView` implementation using the
+  plain Canvas 2D API (no Phaser) and switch to it in `main.ts`. Compare the
+  bundle size with `npm run build`. Which parts of the app did you have to
+  change, and why so few?
 - **Milestone 3:** add a `vibrate` feedback channel. On devices that support
   `navigator.vibrate`, give a short buzz on `blocked` and a pattern on
   `win`, controlled by a new setting. It should need no change to
