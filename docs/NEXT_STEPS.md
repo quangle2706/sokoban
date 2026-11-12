@@ -8,8 +8,8 @@
   (real-device and screen-reader checks are listed as open in
   [ACCESSIBILITY.md](ACCESSIBILITY.md))
 - [x] **4. Static deployment preparation and demo recording**
-  (deployment is ready; going live needs the one-time Pages setting, and
-  the demo needs recording; see below)
+  (deployment is ready and the demo is recorded; going live needs the
+  one-time Pages setting; see below)
 
 ## Milestone 4 outcome
 
@@ -28,15 +28,14 @@ Done:
   about 352 kB. Not optimised yet; see below.
 - **Docs:** [DEPLOYMENT.md](DEPLOYMENT.md), [DEMO.md](DEMO.md) (shot
   list), README screenshots and credits.
+- **Demo:** recorded as `docs/media/demo.gif` and shown in the README.
 
 Still to do (needs the repository owner or a device):
 1. **Enable GitHub Pages:** Settings → Pages → Source: "GitHub Actions".
    Then check the live URL with the release checklist in DEPLOYMENT.md.
-2. **Record the demo** following DEMO.md and save it as
-   `docs/media/demo.gif`.
-3. **Real-device and screen-reader pass:** see the open list in
+2. **Real-device and screen-reader pass:** see the open list in
    ACCESSIBILITY.md.
-4. **Choose a licence:** the repo has none yet, which means "all rights
+3. **Choose a licence:** the repo has none yet, which means "all rights
    reserved" by default. Add a `LICENSE` file if others should be able to
    reuse the code.
 

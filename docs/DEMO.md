@@ -1,5 +1,10 @@
 # Demo recording
 
+**Recorded:** [`docs/media/demo.gif`](media/demo.gif) (28 frames, 1344×820,
+about 3.3 MB). It was made with the Claude-in-Chrome GIF recorder from a
+production build served under `/sokoban/`, following the shot list below
+(the optional mobile shot was left out). GIFs carry no sound.
+
 A short (about 45–60 s) recording that shows the whole game loop. Record at
 1280×800 or larger, from a production build (`npm run build && npm run
 preview`) with a fresh profile or cleared site data.

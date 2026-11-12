@@ -17,6 +17,8 @@ is enabled for the repo; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md)).
 
 See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
 
+![Demo: start level 1, push, undo, win with celebration, next level, level picker, settings with reduced motion](docs/media/demo.gif)
+
 | Home | Gameplay | Level picker |
 | ---- | -------- | ------------ |
 | ![Home screen](docs/media/home.jpg) | ![Gameplay on level 7](docs/media/gameplay.jpg) | ![Level picker](docs/media/level-select.jpg) |
