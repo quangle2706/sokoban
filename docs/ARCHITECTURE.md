@@ -20,8 +20,23 @@
         └──────────────────────────────────┘
 ```
 
-Dependency rule: `engine` imports nothing from other layers. `scenes` and
-`ui` import engine *types* only. `app` is the one place that combines them.
+```
+        ┌──────────── src/storage ─────────┐
+        │ saveData (format + validation)   │   pure; tests run in Node
+        │ progress (unlocks, best, resume) │
+        │ saveStore (localStorage adapter) │   the only browser-API user
+        └──────────────────────────────────┘
+```
+
+Dependency rule: `engine` imports nothing from other layers. `storage` uses
+only the engine. `scenes` and `ui` import engine/storage *types*. `app` is
+the only layer that combines them:
+
+- `App` owns screens (game, level picker, completion), the loaded level and
+  the `SaveData` value, and persists after every change.
+- `GameController` owns the current `Game` for one level and reports changes
+  to `App` through two hooks: `onChange(game, solved)` runs immediately, and
+  `onCompletionShown(game)` runs after the winning glide.
 
 ## Engine (`src/engine`)
 
@@ -54,11 +69,45 @@ Dependency rule: `engine` imports nothing from other layers. `scenes` and
    the HUD counters and calls `view.sync(state, { animate: true }, onSettled)`.
 4. `BoardScene.sync` tweens each sprite whose cell changed (110 ms) and then
    calls `onSettled`.
-5. `onSettled` either opens the completion dialog (if `solved`) or runs the
-   next queued command.
+   Before the glide starts, `onChange` lets `App` save the run (or record
+   the win).
+5. `onSettled` either asks `App` to show the completion dialog (if
+   `solved`) or runs the next queued command.
 
 Undo uses the same path, so its animation is the reverse glide. Restart
 snaps without animation and clears the queue.
+
+## Saving (`src/storage`)
+
+- **Format:** `{ version: 1, completed, inProgress, currentLevelId }`
+  under the key `kho-nho/save`.
+- **Resumable runs are stored as LURD notation.** `notationOf(game)` derives
+  it from the undo history. On load, `resumeGame` replays it through the
+  engine, which rebuilds the state *and* the undo history, and rejects runs
+  that no longer fit the level (for example after a map edit). No positions
+  or animation state are stored.
+- **Saving is immediate.** `onChange` fires before the glide starts, so
+  closing the page mid-animation loses nothing. A win is recorded at that
+  moment too, not when the dialog appears.
+- **Validation** (`parseSave`) never throws:
+  - `fresh`: nothing saved yet.
+  - `loaded`: read without problems.
+  - `repaired`: individual bad entries dropped, the rest kept, short notice shown.
+  - `reset`: unreadable or unknown version. The raw text is copied to
+    `kho-nho/save-unreadable`, play starts fresh, and a notice explains it.
+- **No storage available** (private mode, blocked, full): the game plays
+  normally, and a single notice says progress cannot be saved.
+- **Versioning:** a future format bumps `SAVE_VERSION` and adds a migration
+  step in `parseSave`.
+
+## Screens
+
+The completion overlay and the level picker are both native modal
+`<dialog>`s, which gives focus trapping, Esc to close and an inert
+background. `App.updatePause()` pauses gameplay input whenever either is
+open. While paused, the key handler returns *before* `preventDefault`, so
+keys behave normally in dialogs. Locked levels are plain list items, not
+disabled buttons, so the picker has no button that does nothing.
 
 ## Rendering (`src/scenes`)
 

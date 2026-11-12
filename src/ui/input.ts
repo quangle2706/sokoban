@@ -70,10 +70,12 @@ export class InputController {
     // fine because no menus exist on this screen. Inside a dialog, never steal keys.
     if (event.target instanceof Element && event.target.closest('dialog')) return;
 
+    // While paused (another screen is open) keys keep their normal behavior.
+    if (!this.enabled) return;
     const spec = KEY_MAP[event.code] ?? KEY_MAP[event.key];
     if (!spec) return;
     event.preventDefault(); // stop page scrolling / browser back on Backspace
-    if (!this.enabled || event.repeat) return;
+    if (event.repeat) return;
     this.press(`key:${event.code}`, spec);
   };
 

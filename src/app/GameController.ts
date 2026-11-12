@@ -1,12 +1,21 @@
-import { createGame, isSolved, restart, tryMove, undo, type Game, type Level } from '../engine/index.ts';
+import { isSolved, restart, tryMove, undo, type Game } from '../engine/index.ts';
 import type { BoardView } from '../scenes/BoardView.ts';
-import type { CompletionDialog } from '../ui/completionDialog.ts';
 import type { Hud } from '../ui/hud.ts';
 import type { Command } from '../ui/input.ts';
 import { TEXT } from '../ui/strings.ts';
 
+export interface GameHooks {
+  /**
+   * Called immediately after every successful move, undo or restart, before
+   * any animation, so progress is saved even if the page closes mid-glide.
+   */
+  onChange(game: Game, solved: boolean): void;
+  /** Called once the winning move's animation has finished. */
+  onCompletionShown(game: Game): void;
+}
+
 /**
- * The only place that owns the current `Game` value.
+ * Owns the current `Game` value for the level being played.
  *
  * Data flow:  Command -> engine function -> new Game -> view.sync + hud.update
  *
@@ -18,34 +27,49 @@ import { TEXT } from '../ui/strings.ts';
 const MAX_QUEUED = 4;
 
 export class GameController {
-  private game: Game;
+  private game: Game | null = null;
+  private paused = false;
   private readonly queue: Command[] = [];
   private readonly view: BoardView;
   private readonly hud: Hud;
-  private readonly dialog: CompletionDialog;
+  private readonly hooks: GameHooks;
 
-  constructor(level: Level, view: BoardView, hud: Hud, dialog: CompletionDialog) {
+  constructor(view: BoardView, hud: Hud, hooks: GameHooks) {
     this.view = view;
     this.hud = hud;
-    this.dialog = dialog;
-    this.game = createGame(level);
-    view.showLevel(level, this.game.state);
+    this.hooks = hooks;
+  }
+
+  /** Show a game (fresh or resumed) for its level. */
+  load(game: Game): void {
+    this.queue.length = 0;
+    this.game = game;
+    this.view.showLevel(game.level, game.state);
     this.refreshHud();
   }
 
   /** Read-only snapshot, handy for debugging and browser checks. */
-  get current(): Game {
+  get current(): Game | null {
     return this.game;
   }
 
+  /** While paused (a dialog or another screen is open) commands are ignored. */
+  setPaused(paused: boolean): void {
+    this.paused = paused;
+    if (paused) this.queue.length = 0;
+    this.refreshHud();
+  }
+
   handle(command: Command): void {
-    if (this.dialog.isOpen) return;
+    const game = this.game;
+    if (this.paused || !game) return;
 
     if (command.type === 'restart') {
       this.queue.length = 0;
-      this.game = restart(this.game);
+      this.game = restart(game);
       this.view.sync(this.game.state, { animate: false });
       this.refreshHud();
+      this.hooks.onChange(this.game, false);
       this.hud.announce(TEXT.announceRestart);
       return;
     }
@@ -56,49 +80,48 @@ export class GameController {
     }
 
     if (command.type === 'undo') {
-      const result = undo(this.game);
-      if (!result.undone) return this.flushBuffer();
+      const result = undo(game);
+      if (!result.undone) return this.flushQueue();
       this.game = result.game;
-      this.view.sync(this.game.state, { animate: true }, this.flushBuffer);
+      this.view.sync(this.game.state, { animate: true }, this.flushQueue);
       this.refreshHud();
+      this.hooks.onChange(this.game, false);
       this.hud.announce(TEXT.announceUndo);
       return;
     }
 
-    const result = tryMove(this.game, command.direction);
+    const result = tryMove(game, command.direction);
     if (result.kind === 'blocked') {
       if (result.reason === 'solved') this.hud.showStatus(TEXT.solvedStatus);
       else this.view.bump(command.direction);
       // No animation will settle, so keep draining queued presses now.
-      return this.flushBuffer();
+      return this.flushQueue();
     }
 
-    this.game = result.game;
+    const next = result.game;
+    this.game = next;
     this.refreshHud({ solvedStatus: false }); // the dialog announces the win instead
-    this.view.sync(this.game.state, { animate: true, facing: command.direction }, () => {
-      if (result.solved) {
+    this.hooks.onChange(next, result.solved);
+    this.view.sync(next.state, { animate: true, facing: command.direction }, () => {
+      // `this.game === next` guards against a level switch during the glide.
+      if (result.solved && this.game === next) {
         this.queue.length = 0;
-        this.hud.announce(TEXT.announceSolved(this.game.state.moves, this.game.state.pushes));
-        this.dialog.show(this.game.state);
+        this.hooks.onCompletionShown(next);
       } else {
-        this.flushBuffer();
+        this.flushQueue();
       }
     });
   }
 
-  /** Called when the completion dialog closes. */
-  onDialogClosed(): void {
-    this.refreshHud();
-  }
-
-  private flushBuffer = (): void => {
+  private flushQueue = (): void => {
     const next = this.queue.shift();
     if (next) this.handle(next);
   };
 
   private refreshHud({ solvedStatus = true } = {}): void {
+    if (!this.game) return;
     this.hud.update(this.game.state);
     const solved = isSolved(this.game.level, this.game.state);
-    this.hud.showStatus(solved && solvedStatus && !this.dialog.isOpen ? TEXT.solvedStatus : null);
+    this.hud.showStatus(solved && solvedStatus && !this.paused ? TEXT.solvedStatus : null);
   }
 }

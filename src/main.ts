@@ -1,19 +1,17 @@
 import Phaser from 'phaser';
-import { GameController } from './app/GameController.ts';
+import { App } from './app/App.ts';
 import { parseLevelOrThrow } from './engine/index.ts';
 import { LEVELS } from './levels/levels.ts';
 import { BoardScene } from './scenes/BoardScene.ts';
 import type { BoardView } from './scenes/BoardView.ts';
-import { CompletionDialog } from './ui/completionDialog.ts';
+import { browserStorage, SaveStore } from './storage/saveStore.ts';
 import { byId, Hud } from './ui/hud.ts';
 import { InputController } from './ui/input.ts';
 import './styles.css';
 
-// Milestone 1 ships a single level. Level selection arrives in Milestone 2.
-const LEVEL_INDEX = 0;
-const definition = LEVELS[LEVEL_INDEX];
-if (!definition) throw new Error('No levels defined.');
-const level = parseLevelOrThrow(definition.map);
+// Bundled levels are validated by the test suite; parsing here only fails on
+// a broken build, so failing loudly is right.
+const levels = LEVELS.map((def) => ({ def, level: parseLevelOrThrow(def.map) }));
 
 // Reduced motion follows the OS setting for now (a Settings toggle comes in
 // Milestone 3). It only affects animation, never rules.
@@ -21,27 +19,16 @@ const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
 const reducedMotion = () => motionQuery.matches;
 
 const boardHost = byId('board');
-const hud = new Hud();
-hud.setLevel(LEVEL_INDEX + 1, definition.name);
 
 function start(view: BoardView): void {
-  let controller: GameController | null = null;
-  let input: InputController | null = null;
-
-  const dialog = new CompletionDialog({
-    onOpen: () => input?.setEnabled(false),
-    onReplay: () => controller?.handle({ type: 'restart', repeat: false }),
-    onClose: () => {
-      input?.setEnabled(true);
-      controller?.onDialogClosed();
-    },
-  });
-  controller = new GameController(level, view, hud, dialog);
-  input = new InputController((command) => controller?.handle(command), document.body);
+  const app = new App(levels, view, new Hud(), new SaveStore(browserStorage()));
+  const input = new InputController((command) => app.gameController.handle(command), document.body);
+  app.attachInput(input);
+  app.start();
 
   if (import.meta.env.DEV) {
     // Debug handle for manual/browser checks. Not present in production builds.
-    (window as unknown as { __khoNho: unknown }).__khoNho = { controller, input };
+    (window as unknown as { __khoNho: unknown }).__khoNho = { app, controller: app.gameController, input };
   }
 }
 

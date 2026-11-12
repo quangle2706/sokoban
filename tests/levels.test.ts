@@ -98,13 +98,19 @@ describe('solution notation', () => {
 });
 
 describe('bundled levels', () => {
-  it('has unique ids', () => {
+  it('has ten levels with unique, slug-shaped ids', () => {
     const ids = LEVELS.map((l) => l.id);
+    expect(ids).toHaveLength(10);
     expect(new Set(ids).size).toBe(ids.length);
+    for (const id of ids) expect(id).toMatch(/^[a-z0-9-]+$/);
   });
 
-  for (const def of LEVELS) {
-    describe(def.id, () => {
+  it('has an author solution for every level and no orphaned solutions', () => {
+    expect(Object.keys(SOLUTIONS).sort()).toEqual(LEVELS.map((l) => l.id).sort());
+  });
+
+  for (const [index, def] of LEVELS.entries()) {
+    describe(`${index + 1}. ${def.id}`, () => {
       it('passes structural validation', () => {
         const r = parseLevel(def.map);
         expect(r.ok ? [] : r.issues.map((i) => i.message)).toEqual([]);
@@ -113,7 +119,8 @@ describe('bundled levels', () => {
       it('is not already solved at the start', () => {
         const r = parseLevel(def.map);
         if (!r.ok) throw new Error('invalid');
-        expect(isSolved(r.level, { player: r.level.initialPlayer, crates: r.level.initialCrates, moves: 0, pushes: 0 })).toBe(false);
+        const start = { player: r.level.initialPlayer, crates: r.level.initialCrates, moves: 0, pushes: 0 };
+        expect(isSolved(r.level, start)).toBe(false);
       });
 
       it('is solved by replaying the author solution', () => {
@@ -132,6 +139,8 @@ describe('bundled levels', () => {
         const steps = parseSolution(solution.moves);
         expect(replay.game.state.moves).toBe(steps.length);
         expect(replay.game.state.pushes).toBe(steps.filter((s) => s.expectPush).length);
+        // Recorded metadata must at least be consistent with the replay.
+        expect(replay.game.state.pushes).toBeGreaterThanOrEqual(solution.minPushes);
       });
     });
   }

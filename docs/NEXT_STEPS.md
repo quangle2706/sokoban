@@ -3,48 +3,56 @@
 ## Milestone status
 
 - [x] **1. Engine, rendering, one level, keyboard/touch, undo, restart, completion**
-- [ ] **2. Ten verified levels, level selection, unlocks, local saving, resume**
-- [ ] 3. Home/settings, sound, motion polish, accessibility and responsive testing
+- [x] **2. Ten verified levels, level selection, unlocks, local saving, resume**
+- [ ] **3. Home/settings, sound, motion polish, accessibility and responsive testing**
 - [ ] 4. Static deployment preparation and demo recording
 
-## Milestone 2 plan
+## Milestone 3 plan
 
-1. **Levels:** design 9 more original levels and check each with
-   `node scripts/solve.ts`. Add each solution to
-   `tests/fixtures/solutions.ts`. The existing level tests then cover them
-   automatically. Aim for a gentle difficulty curve. Larger levels may outgrow
-   the plain BFS solver; if so, switch to push-based search with a visited
-   set over normalized player regions.
-2. **Level selection screen** (HTML): numbered cards with locked, available
-   and completed states, plus a line explaining that finishing a level unlocks
-   the next.
-3. **Completion dialog:** add "Màn tiếp theo" and "Chọn màn" once those
-   destinations exist.
-4. **`src/storage/`:** versioned save data (`{ version: 1, ... }`), validated
-   on load, recovering gracefully from corrupt or incompatible data. Store:
-   completed levels, current level plus a resumable state (initial state +
-   move list, replayed through the engine on load), and the best run per
-   level (fewest pushes, then fewest moves, recorded from one single run).
-   Never store animation state.
-5. **GameController:** support switching levels (`view.showLevel` already
-   rebuilds the board).
+1. **Home screen** (HTML): "Chơi tiếp" (opens `startingLevelIndex`),
+   "Chọn màn", "Hướng dẫn", "Cài đặt". Launch should open Home instead of
+   going straight into a level.
+2. **How-to-play screen:** rules, symbols (goal diamond, check-marked crate)
+   and controls, in Vietnamese.
+3. **Settings screen:**
+   - Sound on/off.
+   - Reduced motion: system default / on / off. Today `BoardScene` reads a
+     `reducedMotion()` function; point it at the setting.
+   - Reset progress, behind a confirmation dialog.
+
+   Store settings in the save data. Adding an optional `settings` field with
+   defaults needs no version bump; changing existing fields does.
+4. **`src/audio/`:** small synthesized sounds (Web Audio, no downloads) for
+   step, push, blocked and win. They must respect the sound setting and
+   browser autoplay rules (start only after a user gesture).
+5. **Motion polish:** a gentle win effect that is skipped under reduced
+   motion.
+6. **Accessibility pass:** keyboard-only run-through of every screen,
+   screen-reader labels, contrast check, arrow-key movement between level
+   cards, and an optional text description of the board.
+7. **Responsive testing:** real phones (iOS Safari, Android Chrome) plus
+   Firefox and Safari on desktop.
 
 ## Known limitations / ideas
 
-- Restart clears undo history (deliberate for now; see the exercise below).
-- No deadlock detection (optional, later). Stuck crates never end the level.
-- Reduced motion follows the OS setting only. A settings toggle comes in
-  Milestone 3.
-- If the browser throttles animation frames (e.g. a background tab), queued
-  presses wait for the board to settle. Up to 4 fresh presses are kept;
-  extra ones are dropped.
+- Restart clears undo history (see the Milestone 1 exercise).
+- No deadlock detection; stuck crates never end a level.
+- Two open tabs both write the same save, and the last write wins. A
+  `storage` event listener could sync them.
+- Locked level names are hidden on purpose (a small surprise). Reconsider
+  during the accessibility pass.
+- If the browser throttles animation frames (seen at 2–12 fps in an
+  automated test tab), glides slow down. Up to 4 fresh presses wait in a
+  queue; any beyond that are dropped.
 - The Phaser chunk is about 1.37 MB (357 kB gzipped). Consider a custom
-  Phaser build in Milestone 4 if load time matters.
-- The canvas has no per-cell accessibility. A text description of the board
-  for screen readers could come in Milestone 3.
+  Phaser build in Milestone 4.
+- `scripts/solve.ts` copes with these small levels. Much larger levels would
+  need deadlock patterns or an A* heuristic.
 
-## Learning exercise
+## Learning exercises
 
-Make **restart undoable**: after pressing “Chơi lại”, one undo returns to the
-position just before the restart. Write the failing test in
-`tests/engine.test.ts` first.
+- **Milestone 1:** make restart undoable.
+- **Milestone 2:** show the best run in the HUD while playing a completed
+  level (e.g. "Kỷ lục: 4 đẩy · 15 bước"). The data is already in
+  `SaveData.completed`; decide which layer should pass it to the `Hud`, and
+  why.

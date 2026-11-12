@@ -59,3 +59,29 @@ export function replaySolution(level: Level, text: string): ReplayResult {
   }
   return { ok: true, game, solved };
 }
+
+const DIRECTION_LETTER: Readonly<Record<string, string>> = {
+  '0,-1': 'u',
+  '0,1': 'd',
+  '-1,0': 'l',
+  '1,0': 'r',
+};
+
+/**
+ * The LURD notation of the moves that led from the level start to the
+ * current state, derived from the undo history (no extra bookkeeping).
+ * Replaying it with replaySolution() rebuilds the same state AND history,
+ * which is how save data resumes a run, including its undo stack.
+ */
+export function notationOf(game: Game): string {
+  const states = [...game.history, game.state];
+  let out = '';
+  for (let i = 1; i < states.length; i++) {
+    const a = states[i - 1]!;
+    const b = states[i]!;
+    const letter = DIRECTION_LETTER[`${b.player.x - a.player.x},${b.player.y - a.player.y}`];
+    if (!letter) throw new Error(`History step ${i} is not a single move.`);
+    out += b.pushes > a.pushes ? letter.toUpperCase() : letter;
+  }
+  return out;
+}

@@ -88,6 +88,47 @@ shown separately by replaying an author solution (below).
 - `tests/levels.test.ts` replays each solution through the real engine. It
   checks that every step succeeds, that the walk/push case matches, that the
   level ends solved, and that the counters match the notation.
-- `level-01`'s solution (51 moves, 15 pushes) came from the exhaustive BFS in
-  `scripts/solve.ts`, so it is **move-optimal**. It is not claimed to be
-  push-optimal.
+- Each entry records what the exhaustive searches in `scripts/solve.ts`
+  proved when the level was made: `moveOptimal` (the stored solution has
+  the fewest possible moves) and `minPushes` (the fewest pushes any
+  solution needs). The test checks the replay never uses fewer pushes than
+  `minPushes`. Re-run the solver after editing a map.
+
+## The ten levels
+
+All original designs. Difficulty is ordered by how many states the
+move-optimal search had to explore, a rough proxy for how much planning a
+level needs.
+
+| # | id          | Name          | Crates | Fewest moves | Fewest pushes | States searched |
+| - | ----------- | ------------- | ------ | ------------ | ------------- | --------------- |
+| 1 | buoc-dau    | Bước đầu      | 2 | 5  | 2  | 121     |
+| 2 | hai-ben     | Hai bên       | 2 | 15 | 4  | 290     |
+| 3 | goc-nho     | Góc nhỏ       | 2 | 16 | 5  | 938     |
+| 4 | loi-hep     | Lối hẹp       | 2 | 19 | 3  | 1,345   |
+| 5 | ke-hang     | Kệ hàng       | 3 | 29 | 10 | 46,502  |
+| 6 | nga-re      | Ngã rẽ        | 3 | 38 | 8  | 34,504  |
+| 7 | hanh-lang   | Hành lang dài | 4 | 57 | 18 | 177,779 |
+| 8 | bac-thang   | Bậc thang     | 4 | 50 | 11 | 233,475 |
+| 9 | doi-xung    | Đối xứng      | 4 | 38 | 8  | 503,406 |
+| 10 | goc-kho    | Góc kho       | 4 | 51 | 15 | 611,213 |
+
+"Fewest moves" and "fewest pushes" come from two separate searches, so one
+solution need not achieve both (e.g. Đối xứng: 38 moves uses 10 pushes;
+8 pushes needs more moves).
+
+## Progression and saving
+
+- **Unlocks:** level 1 is always open. Finishing level N opens level N+1. A
+  finished level stays open and can be replayed at any time.
+- **Best run:** fewest pushes, with fewest moves breaking ties. Both numbers
+  always come from one single run and are never mixed across runs. Undoing
+  within a run is fine; the counters already reflect the undo.
+- **Resume:** every level keeps its own unfinished run. Switching levels and
+  coming back, or reloading the page, continues where you left off, and undo
+  still works. Restart clears that level's saved run.
+- **On launch** the game opens the last level you were on (or, after a win,
+  the next one). A saved level that is unknown or locked is ignored, and the
+  first open unfinished level is used instead.
+- Progress lives only in this browser on this device. There is no account
+  and no sync.

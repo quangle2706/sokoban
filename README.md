@@ -3,8 +3,9 @@
 An original, cozy, top-down Sokoban-style puzzle game for the web.
 Push every crate onto a goal. All player-facing text is Vietnamese.
 
-**Status: Milestone 1** — puzzle engine, one playable level, keyboard + touch
-controls, undo, restart, completion overlay. See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
+**Status: Milestone 2.** Ten original levels with verified solutions, a level
+picker with unlocks, and progress saved in this browser (including resuming
+an unfinished run with its undo history). See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
 
 ## Requirements
 
@@ -21,8 +22,8 @@ npm test             # Vitest: pure engine + level tests (no browser needed)
 npm run typecheck    # tsc --noEmit
 npm run build        # typecheck + production build into dist/
 npm run preview      # serve the production build locally
-node scripts/solve.ts            # author tool: BFS-solve every bundled level
-node scripts/solve.ts level-01   # ...or one level
+node scripts/solve.ts                  # author tool: push-optimal search, all levels
+node scripts/solve.ts --moves goc-kho  # move-optimal search for one level
 ```
 
 ## Controls
@@ -32,6 +33,7 @@ node scripts/solve.ts level-01   # ...or one level
 | Move    | Arrow keys or W A S D  | Direction pad        |
 | Undo    | Z, U or Backspace      | “Hoàn tác” button    |
 | Restart | R                      | “Chơi lại” button    |
+| Levels  | Tab to “Chọn màn”, Esc to go back | “Chọn màn” button |
 
 Holding a direction (key or button) moves once, then repeats after 260 ms
 every 140 ms.
@@ -49,14 +51,14 @@ src/
   levels/   player-facing level definitions
   scenes/   Phaser renderer behind the BoardView interface
   ui/       DOM HUD, input controller, completion dialog, Vietnamese strings
-  app/      GameController: wires input -> engine -> renderer/UI
+  storage/  versioned save format, pure progress rules, localStorage adapter
+  app/      App (screens, levels, saving) + GameController (input -> engine -> view)
 tests/      Vitest suites + author-only solutions (tests/fixtures)
 scripts/    author tools (BFS solver)
 docs/       rules, architecture, next steps
 ```
 
-`src/storage/` and `src/audio/` will be added in Milestones 2 and 3, when
-there is something real to put in them.
+`src/audio/` will be added in Milestone 3, along with sound.
 
 ## Documentation
 

@@ -11,6 +11,10 @@
   <body>
     <div class="app">
       <header class="hud">
+        <button type="button" id="open-levels" class="btn btn--menu" aria-label="Chọn màn">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7.5" height="7.5" rx="2" fill="currentColor"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" fill="currentColor"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" fill="currentColor"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" fill="currentColor"/></svg>
+          <span class="btn--menu__text">Chọn màn</span>
+        </button>
         <div class="hud__title">
           <p class="hud__brand">Kho Nhỏ</p>
           <h1 class="hud__level"><span id="level-number"></span> <span class="hud__sep" aria-hidden="true">·</span> <span id="level-name"></span></h1>
@@ -24,6 +28,7 @@
       <main class="stage">
         <div id="board" class="board" role="img" aria-label="Bàn chơi"></div>
         <p id="status" class="status" hidden></p>
+        <p id="notice" class="notice" role="status" hidden></p>
       </main>
 
       <section class="controls" aria-label="Điều khiển">
@@ -47,15 +52,36 @@
 
     <dialog id="completion" class="dialog" aria-labelledby="completion-title">
       <h2 id="completion-title" class="dialog__title">Hoàn thành!</h2>
-      <p>Mọi thùng hàng đã về đúng chỗ.</p>
+      <p id="completion-message">Mọi thùng hàng đã về đúng chỗ.</p>
       <dl class="dialog__stats">
         <div class="stat"><dt>Bước</dt><dd id="completion-moves">0</dd></div>
         <div class="stat"><dt>Đẩy</dt><dd id="completion-pushes">0</dd></div>
       </dl>
-      <p class="dialog__note">Bạn có thể đóng bảng này để xem lại bàn chơi hoặc hoàn tác nước đi cuối.</p>
+      <p id="completion-best" class="dialog__best"></p>
+      <p id="completion-unlocked" class="dialog__unlocked" hidden></p>
       <div class="dialog__actions">
-        <button type="button" class="btn btn--primary" data-dialog="replay">Chơi lại màn này</button>
-        <button type="button" class="btn" data-dialog="close">Xem bàn chơi</button>
+        <button type="button" class="btn btn--primary" data-dialog="next">Màn tiếp theo</button>
+        <button type="button" class="btn" id="completion-replay" data-dialog="replay">Chơi lại màn này</button>
+        <button type="button" class="btn" data-dialog="levels">Chọn màn</button>
+        <button type="button" class="btn btn--quiet" data-dialog="close">Xem bàn chơi</button>
+      </div>
+      <p class="dialog__note">“Xem bàn chơi” đóng bảng này để bạn nhìn lại hoặc hoàn tác nước đi cuối.</p>
+    </dialog>
+
+    <dialog id="level-select" class="screen" aria-labelledby="level-select-title">
+      <div class="screen__inner">
+        <header class="screen__header">
+          <button type="button" class="btn btn--back" data-action="back">
+            <span aria-hidden="true">←</span> Quay lại
+          </button>
+          <h2 id="level-select-title" class="screen__title">Chọn màn</h2>
+        </header>
+        <p class="screen__lead">
+          <span id="level-summary"></span>. Hoàn thành một màn để mở khóa màn tiếp theo. Màn đã mở có thể
+          chơi lại bất cứ lúc nào.
+        </p>
+        <ol id="level-grid" class="level-grid"></ol>
+        <p class="screen__note">Tiến trình chỉ được lưu trong trình duyệt này, trên thiết bị này.</p>
       </div>
     </dialog>
 

@@ -6,6 +6,8 @@
   --goal: #d9a441;
   --player: #4f6d9a;
   --player-dark: #3b5479;
+  --goal-dark: #7a5a17;
+  --wall-dark: #4d5a50;
   --text: #292524;
   --text-muted: #57534e;
   --surface: #fffaf2;
@@ -63,6 +65,35 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: var(--gap);
+}
+
+.hud__title {
+  flex: 1;
+  min-width: 0;
+}
+
+.btn--menu {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+}
+
+.btn--menu svg {
+  width: 20px;
+  height: 20px;
+  color: var(--player);
+}
+
+/* Narrow screens: icon-only menu button (it keeps its aria-label). */
+@media (max-width: 520px) {
+  .btn--menu {
+    padding: 0;
+    justify-content: center;
+  }
+  .btn--menu__text {
+    display: none;
+  }
 }
 
 .hud__brand {
@@ -144,6 +175,24 @@ body {
   color: var(--page);
   font-size: 0.9rem;
   text-align: center;
+}
+
+.notice {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 8px);
+  margin: 0;
+  padding: 8px 14px;
+  border: 1px solid var(--goal-dark);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
+  text-align: center;
+  box-shadow: 0 6px 18px rgb(41 37 36 / 0.15);
 }
 
 /* ---------- Controls ---------- */
@@ -262,6 +311,10 @@ body {
     min-width: 0;
     padding: 8px 12px;
   }
+  .stat {
+    min-width: 52px;
+    padding-inline: 8px;
+  }
 }
 
 /* Short screens (small phones): shrink the pad, keep >= 44px targets. */
@@ -362,6 +415,204 @@ body {
   margin-top: 16px;
 }
 
+.dialog__actions [hidden] {
+  display: none;
+}
+
+.dialog__best {
+  margin: 0;
+  font-weight: 600;
+}
+
+.dialog__best.is-new {
+  display: inline-block;
+  padding: 4px 12px;
+  border: 2px solid var(--goal-dark);
+  border-radius: 999px;
+  background: var(--goal);
+  color: var(--text);
+}
+
+.dialog__unlocked {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+}
+
+.btn--quiet {
+  background: transparent;
+  box-shadow: none;
+}
+
+/* ---------- Level select (full-screen modal dialog) ---------- */
+.screen {
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  margin: 0;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  border: 0;
+  background: var(--page);
+  color: var(--text);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.screen::backdrop {
+  background: var(--page);
+}
+
+.screen__inner {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.screen__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.screen__title {
+  margin: 0;
+  font-size: 1.6rem;
+}
+
+.btn--back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.screen__lead {
+  margin: 12px 0 20px;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.screen__note {
+  margin: 24px 0 8px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.level-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level-grid > li {
+  display: flex;
+}
+
+.level-card {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-height: 116px;
+  padding: 12px 14px;
+  border: 2px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+}
+
+button.level-card {
+  cursor: pointer;
+  box-shadow: 0 3px 0 var(--border);
+  touch-action: manipulation;
+}
+
+button.level-card:hover {
+  border-color: var(--player);
+}
+
+button.level-card:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
+}
+
+button.level-card:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 0 var(--border);
+}
+
+.level-card__number {
+  font-size: 1.9rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.level-card__name {
+  font-weight: 700;
+}
+
+.level-card__detail {
+  margin-top: auto;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+.level-card__badge {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+}
+
+.level-card__badge svg {
+  width: 18px;
+  height: 18px;
+}
+
+.level-card__badge--done {
+  border: 2px solid var(--goal-dark);
+  background: var(--goal);
+  color: var(--text);
+}
+
+.level-card__badge--lock {
+  background: var(--wall);
+  color: var(--page);
+}
+
+.level-card.is-completed {
+  border-color: var(--goal-dark);
+}
+
+.level-card.is-in-progress {
+  border-color: var(--player);
+}
+
+.level-card.is-current {
+  box-shadow: 0 0 0 3px var(--page), 0 0 0 6px var(--player);
+}
+
+.level-card.is-locked {
+  border-style: dashed;
+  background: #efe7da;
+  color: var(--text-muted);
+}
+
+.level-card.is-locked .level-card__detail {
+  color: var(--text-muted);
+}
+
 @keyframes pop {
   from {
     opacity: 0;
@@ -373,7 +624,8 @@ body {
   .dialog[open] {
     animation: none;
   }
-  .btn:active {
+  .btn:active,
+  button.level-card:active {
     transform: none;
   }
 }
