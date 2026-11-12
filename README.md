@@ -3,9 +3,11 @@
 An original, cozy, top-down Sokoban-style puzzle game for the web.
 Push every crate onto a goal. All player-facing text is Vietnamese.
 
-**Status: Milestone 2.** Ten original levels with verified solutions, a level
-picker with unlocks, and progress saved in this browser (including resuming
-an unfinished run with its undo history). See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
+**Status: Milestone 3.** Ten original levels with verified solutions, a
+Home screen, level picker with unlocks, how-to page, and settings for sound,
+reduced motion and resetting progress. Sound effects are synthesized in the
+browser, with no audio files. Progress is saved in this browser, including
+unfinished runs with their undo history. See [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md).
 
 ## Requirements
 
@@ -33,7 +35,8 @@ node scripts/solve.ts --moves goc-kho  # move-optimal search for one level
 | Move    | Arrow keys or W A S D  | Direction pad        |
 | Undo    | Z, U or Backspace      | “Hoàn tác” button    |
 | Restart | R                      | “Chơi lại” button    |
-| Levels  | Tab to “Chọn màn”, Esc to go back | “Chọn màn” button |
+| Menu    | Esc (in game); Esc again goes back | “Menu” button   |
+| Level picker | Arrow keys between cards, Enter to play | Tap a card |
 
 Holding a direction (key or button) moves once, then repeats after 260 ms
 every 140 ms.
@@ -41,7 +44,7 @@ every 140 ms.
 ## Stack
 
 TypeScript · Phaser 4 (rendering only) · Vite · Vitest. No UI framework: the
-HUD, buttons and dialog are plain, accessible HTML/CSS.
+HUD, buttons, screens and dialogs are plain, accessible HTML/CSS.
 
 ## Project layout
 
@@ -52,16 +55,16 @@ src/
   scenes/   Phaser renderer behind the BoardView interface
   ui/       DOM HUD, input controller, completion dialog, Vietnamese strings
   storage/  versioned save format, pure progress rules, localStorage adapter
+  audio/    synthesized sound effects (Web Audio API, no files)
   app/      App (screens, levels, saving) + GameController (input -> engine -> view)
 tests/      Vitest suites + author-only solutions (tests/fixtures)
 scripts/    author tools (BFS solver)
 docs/       rules, architecture, next steps
 ```
 
-`src/audio/` will be added in Milestone 3, along with sound.
-
 ## Documentation
 
 - [docs/GAME_RULES.md](docs/GAME_RULES.md) — rules, counters, level format
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — module boundaries and data flow
+- [docs/ACCESSIBILITY.md](docs/ACCESSIBILITY.md) — what was checked, and what still needs real devices
 - [docs/NEXT_STEPS.md](docs/NEXT_STEPS.md) — roadmap and known limitations

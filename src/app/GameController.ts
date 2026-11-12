@@ -1,8 +1,11 @@
-import { isSolved, restart, tryMove, undo, type Game } from '../engine/index.ts';
+import { isSolved, restart, terrainAt, tryMove, undo, type Game, type GameState } from '../engine/index.ts';
 import type { BoardView } from '../scenes/BoardView.ts';
 import type { Hud } from '../ui/hud.ts';
 import type { Command } from '../ui/input.ts';
 import { TEXT } from '../ui/strings.ts';
+
+/** Things worth a sound (or any other feedback) — no rules, no UI. */
+export type GameFeedback = 'step' | 'push' | 'goal' | 'blocked' | 'undo' | 'restart' | 'win';
 
 export interface GameHooks {
   /**
@@ -10,8 +13,10 @@ export interface GameHooks {
    * any animation, so progress is saved even if the page closes mid-glide.
    */
   onChange(game: Game, solved: boolean): void;
-  /** Called once the winning move's animation has finished. */
+  /** Called after the winning glide and the celebration have finished. */
   onCompletionShown(game: Game): void;
+  /** Feedback events, e.g. for sound effects. */
+  onFeedback(event: GameFeedback): void;
 }
 
 /**
@@ -62,7 +67,7 @@ export class GameController {
 
   handle(command: Command): void {
     const game = this.game;
-    if (this.paused || !game) return;
+    if (this.paused || !game || command.type === 'menu') return; // menu is the App's job
 
     if (command.type === 'restart') {
       this.queue.length = 0;
@@ -70,6 +75,7 @@ export class GameController {
       this.view.sync(this.game.state, { animate: false });
       this.refreshHud();
       this.hooks.onChange(this.game, false);
+      this.hooks.onFeedback('restart');
       this.hud.announce(TEXT.announceRestart);
       return;
     }
@@ -86,27 +92,43 @@ export class GameController {
       this.view.sync(this.game.state, { animate: true }, this.flushQueue);
       this.refreshHud();
       this.hooks.onChange(this.game, false);
-      this.hud.announce(TEXT.announceUndo);
+      this.hooks.onFeedback('undo');
+      this.hud.announce(`${TEXT.announceUndo} ${this.goalSummary(this.game.state)}`);
       return;
     }
 
     const result = tryMove(game, command.direction);
     if (result.kind === 'blocked') {
       if (result.reason === 'solved') this.hud.showStatus(TEXT.solvedStatus);
-      else this.view.bump(command.direction);
+      else {
+        this.view.bump(command.direction);
+        // Holding a key against a wall should not buzz repeatedly.
+        if (!command.repeat) this.hooks.onFeedback('blocked');
+      }
       // No animation will settle, so keep draining queued presses now.
       return this.flushQueue();
     }
 
     const next = result.game;
+    const before = this.filledGoals(game.state);
+    const after = this.filledGoals(next.state);
     this.game = next;
     this.refreshHud({ solvedStatus: false }); // the dialog announces the win instead
     this.hooks.onChange(next, result.solved);
+    if (result.kind === 'pushed') {
+      this.hooks.onFeedback(after > before && !result.solved ? 'goal' : 'push');
+      if (after !== before && !result.solved) this.hud.announce(this.goalSummary(next.state));
+    } else {
+      this.hooks.onFeedback('step');
+    }
     this.view.sync(next.state, { animate: true, facing: command.direction }, () => {
-      // `this.game === next` guards against a level switch during the glide.
+      // `this.game === next` guards against undo or a level switch meanwhile.
       if (result.solved && this.game === next) {
         this.queue.length = 0;
-        this.hooks.onCompletionShown(next);
+        this.hooks.onFeedback('win');
+        this.view.celebrate(() => {
+          if (this.game === next) this.hooks.onCompletionShown(next);
+        });
       } else {
         this.flushQueue();
       }
@@ -118,9 +140,19 @@ export class GameController {
     if (next) this.handle(next);
   };
 
+  private filledGoals(state: GameState): number {
+    const level = this.game!.level;
+    return state.crates.filter((c) => terrainAt(level, c) === 'goal').length;
+  }
+
+  private goalSummary(state: GameState): string {
+    return TEXT.goalsFilled(this.filledGoals(state), state.crates.length);
+  }
+
   private refreshHud({ solvedStatus = true } = {}): void {
     if (!this.game) return;
     this.hud.update(this.game.state);
+    this.hud.setBoardSummary(this.goalSummary(this.game.state));
     const solved = isSolved(this.game.level, this.game.state);
     this.hud.showStatus(solved && solvedStatus && !this.paused ? TEXT.solvedStatus : null);
   }

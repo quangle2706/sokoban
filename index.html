@@ -9,11 +9,12 @@
     <title>Kho Nhỏ</title>
   </head>
   <body>
+    <!-- ================= Gameplay ================= -->
     <div class="app">
       <header class="hud">
-        <button type="button" id="open-levels" class="btn btn--menu" aria-label="Chọn màn">
-          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="3" y="3" width="7.5" height="7.5" rx="2" fill="currentColor"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" fill="currentColor"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="2" fill="currentColor"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" fill="currentColor"/></svg>
-          <span class="btn--menu__text">Chọn màn</span>
+        <button type="button" id="open-menu" class="btn btn--menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 11.2L12 4l8.5 7.2V20a1 1 0 0 1-1 1H15v-6H9v6H4.5a1 1 0 0 1-1-1z" fill="currentColor"/></svg>
+          <span class="btn--menu__text">Menu</span>
         </button>
         <div class="hud__title">
           <p class="hud__brand">Kho Nhỏ</p>
@@ -46,10 +47,11 @@
           <button type="button" class="btn btn--dir dpad__right" data-command="move" data-direction="right" aria-label="Phải">▶</button>
           <button type="button" class="btn btn--dir dpad__down" data-command="move" data-direction="down" aria-label="Xuống">▼</button>
         </div>
-        <p class="hint">Phím mũi tên hoặc W A S D để đi · Z để hoàn tác · R để chơi lại</p>
+        <p class="hint">Phím mũi tên hoặc W A S D để đi · Z để hoàn tác · R để chơi lại · Esc để mở menu</p>
       </section>
     </div>
 
+    <!-- ================= Completion ================= -->
     <dialog id="completion" class="dialog" aria-labelledby="completion-title">
       <h2 id="completion-title" class="dialog__title">Hoàn thành!</h2>
       <p id="completion-message">Mọi thùng hàng đã về đúng chỗ.</p>
@@ -68,6 +70,33 @@
       <p class="dialog__note">“Xem bàn chơi” đóng bảng này để bạn nhìn lại hoặc hoàn tác nước đi cuối.</p>
     </dialog>
 
+    <!-- ================= Home ================= -->
+    <dialog id="home" class="screen screen--home" aria-labelledby="home-title">
+      <div class="screen__inner home">
+        <div class="home__logo" aria-hidden="true">
+          <svg viewBox="0 0 120 64" focusable="false">
+            <rect x="6" y="14" width="44" height="44" rx="8" fill="#B97B46" stroke="#7A4E2A" stroke-width="4"/>
+            <path d="M16 24h24v24H16z M16 48L40 24" fill="none" stroke="#7A4E2A" stroke-width="3" opacity=".6"/>
+            <path d="M88 10l22 22-22 22-22-22z" fill="#D9A441" stroke="#7A5A17" stroke-width="4"/>
+            <circle cx="88" cy="32" r="5" fill="#7A5A17"/>
+          </svg>
+        </div>
+        <h2 id="home-title" class="home__title">Kho Nhỏ</h2>
+        <p class="home__tagline">Đẩy từng thùng hàng về đúng chỗ.</p>
+        <nav class="home__menu" aria-label="Menu chính">
+          <button type="button" class="btn btn--primary btn--big" data-home="continue">
+            <span>Chơi tiếp</span>
+            <span id="home-continue-detail" class="btn__detail"></span>
+          </button>
+          <button type="button" class="btn btn--big" data-home="levels">Chọn màn</button>
+          <button type="button" class="btn btn--big" data-home="howto">Hướng dẫn</button>
+          <button type="button" class="btn btn--big" data-home="settings">Cài đặt</button>
+        </nav>
+        <p id="home-progress" class="screen__note"></p>
+      </div>
+    </dialog>
+
+    <!-- ================= Level select ================= -->
     <dialog id="level-select" class="screen" aria-labelledby="level-select-title">
       <div class="screen__inner">
         <header class="screen__header">
@@ -82,6 +111,115 @@
         </p>
         <ol id="level-grid" class="level-grid"></ol>
         <p class="screen__note">Tiến trình chỉ được lưu trong trình duyệt này, trên thiết bị này.</p>
+      </div>
+    </dialog>
+
+    <!-- ================= How to play ================= -->
+    <dialog id="howto" class="screen" aria-labelledby="howto-title">
+      <div class="screen__inner prose">
+        <header class="screen__header">
+          <button type="button" class="btn btn--back" data-action="back">
+            <span aria-hidden="true">←</span> Quay lại
+          </button>
+          <h2 id="howto-title" class="screen__title">Hướng dẫn</h2>
+        </header>
+
+        <h3>Mục tiêu</h3>
+        <p>Đẩy tất cả thùng hàng vào các ô đích. Khi mọi thùng đều đã vào chỗ, bạn hoàn thành màn chơi.</p>
+
+        <h3>Các ô trên bàn chơi</h3>
+        <ul class="legend">
+          <li><img data-tile="player" alt="" width="48" height="48" /><span><strong>Bạn</strong>: người thủ kho.</span></li>
+          <li><img data-tile="crate" alt="" width="48" height="48" /><span><strong>Thùng hàng</strong>: cần đẩy vào ô đích.</span></li>
+          <li><img data-tile="goal" alt="" width="48" height="48" /><span><strong>Ô đích</strong>: hình thoi có chấm ở giữa.</span></li>
+          <li><img data-tile="crateOnGoal" alt="" width="48" height="48" /><span><strong>Thùng đã vào chỗ</strong>: có viền vàng và dấu tích.</span></li>
+          <li><img data-tile="wall" alt="" width="48" height="48" /><span><strong>Tường</strong>: không đi qua được.</span></li>
+        </ul>
+
+        <h3>Luật chơi</h3>
+        <ul>
+          <li>Mỗi lần đi một ô: lên, xuống, trái hoặc phải.</li>
+          <li>Đi vào một thùng hàng sẽ đẩy nó đi một ô, nếu phía sau thùng còn trống.</li>
+          <li>Chỉ đẩy được, không kéo được.</li>
+          <li>Mỗi lần chỉ đẩy được một thùng. Tường hoặc thùng khác phía sau sẽ chặn lại.</li>
+        </ul>
+
+        <h3>Mẹo</h3>
+        <ul>
+          <li>Thùng bị đẩy vào góc tường thường không lấy ra được nữa. Đừng lo, hãy bấm <strong>Hoàn tác</strong> hoặc <strong>Chơi lại</strong>.</li>
+          <li>Hãy nghĩ trước thùng nào cần vào chỗ trước.</li>
+        </ul>
+
+        <h3>Điều khiển</h3>
+        <table class="controls-table">
+          <thead><tr><th scope="col">Việc</th><th scope="col">Bàn phím</th><th scope="col">Cảm ứng</th></tr></thead>
+          <tbody>
+            <tr><th scope="row">Di chuyển</th><td>Phím mũi tên hoặc W A S D</td><td>Bàn phím hướng ▲ ◀ ▶ ▼</td></tr>
+            <tr><th scope="row">Hoàn tác</th><td>Z, U hoặc Backspace</td><td>Nút Hoàn tác</td></tr>
+            <tr><th scope="row">Chơi lại</th><td>R</td><td>Nút Chơi lại</td></tr>
+            <tr><th scope="row">Menu</th><td>Esc</td><td>Nút Menu</td></tr>
+          </tbody>
+        </table>
+        <p>Giữ một phím hoặc nút hướng để đi liên tục.</p>
+
+        <h3>Bước, Đẩy và Kỷ lục</h3>
+        <p>
+          <strong>Bước</strong> đếm mọi lần di chuyển, kể cả khi đẩy. <strong>Đẩy</strong> đếm số lần đẩy thùng.
+          Kỷ lục của mỗi màn là lượt chơi có ít lần đẩy nhất; nếu bằng nhau thì tính lượt có ít bước hơn.
+        </p>
+      </div>
+    </dialog>
+
+    <!-- ================= Settings ================= -->
+    <dialog id="settings" class="screen" aria-labelledby="settings-title">
+      <div class="screen__inner">
+        <header class="screen__header">
+          <button type="button" class="btn btn--back" data-action="back">
+            <span aria-hidden="true">←</span> Quay lại
+          </button>
+          <h2 id="settings-title" class="screen__title">Cài đặt</h2>
+        </header>
+
+        <section class="setting" aria-labelledby="setting-sound-title">
+          <h3 id="setting-sound-title" class="setting__title">Âm thanh</h3>
+          <label class="switch">
+            <input type="checkbox" id="setting-sound" role="switch" />
+            <span class="switch__track" aria-hidden="true"></span>
+            <span>Bật hiệu ứng âm thanh</span>
+          </label>
+        </section>
+
+        <section class="setting">
+          <fieldset class="setting__group">
+            <legend class="setting__title">Chuyển động</legend>
+            <label class="radio"><input type="radio" name="motion" value="system" /> <span>Theo cài đặt của thiết bị</span></label>
+            <label class="radio"><input type="radio" name="motion" value="reduce" /> <span>Giảm chuyển động</span></label>
+            <label class="radio"><input type="radio" name="motion" value="full" /> <span>Đầy đủ hiệu ứng</span></label>
+          </fieldset>
+          <p class="setting__hint">
+            Giảm chuyển động sẽ tắt hiệu ứng trượt, rung và ăn mừng. Luật chơi không thay đổi.
+            <span id="motion-system-hint"></span>
+          </p>
+        </section>
+
+        <section class="setting setting--danger" aria-labelledby="setting-progress-title">
+          <h3 id="setting-progress-title" class="setting__title">Tiến trình</h3>
+          <p class="setting__hint">Tiến trình chỉ được lưu trong trình duyệt này, trên thiết bị này.</p>
+          <button type="button" class="btn btn--danger-outline" id="reset-progress">Xóa tiến trình…</button>
+          <p id="settings-status" class="setting__status" role="status"></p>
+        </section>
+      </div>
+    </dialog>
+
+    <dialog id="confirm-reset" class="dialog" aria-labelledby="confirm-reset-title" aria-describedby="confirm-reset-text">
+      <h2 id="confirm-reset-title" class="dialog__title">Xóa toàn bộ tiến trình?</h2>
+      <p id="confirm-reset-text">
+        Các màn đã hoàn thành, kỷ lục và lượt chơi dở sẽ bị xóa. Cài đặt vẫn được giữ nguyên.
+        Không thể hoàn tác việc này.
+      </p>
+      <div class="dialog__actions">
+        <button type="button" class="btn" data-confirm="cancel">Hủy</button>
+        <button type="button" class="btn btn--danger" data-confirm="ok">Xóa tiến trình</button>
       </div>
     </dialog>
 

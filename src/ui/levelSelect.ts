@@ -24,7 +24,8 @@ const ICON_LOCK =
   '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5" y="10.5" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5" fill="none" stroke="currentColor" stroke-width="2.4"/></svg>';
 
 /**
- * Full-screen level picker on a modal <dialog> (focus trap, Esc = back).
+ * Full-screen level picker on a modal <dialog> (focus trap, Esc = back,
+ * arrow keys move between cards).
  * Locked levels are rendered as non-interactive list items, not disabled
  * buttons, so there is never a button that does nothing.
  */
@@ -40,10 +41,31 @@ export class LevelSelect {
     this.grid.addEventListener('click', (event) => {
       const card = (event.target as Element).closest<HTMLButtonElement>('button[data-index]');
       if (!card) return;
-      const index = Number(card.dataset.index);
-      this.dialog.close();
-      this.handlers.onPick(index);
+      this.handlers.onPick(Number(card.dataset.index));
     });
+    this.grid.addEventListener('keydown', (event) => this.moveFocus(event));
+  }
+
+  /**
+   * Arrow keys move focus between cards in reading order (left/right) or by
+   * one visual row (up/down). Locked cards are not focusable, so focus
+   * stays put when the target is locked.
+   */
+  private moveFocus(event: KeyboardEvent): void {
+    const step = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -this.columns(), ArrowDown: this.columns() }[event.key];
+    if (step === undefined) return;
+    const items = [...this.grid.children] as HTMLElement[];
+    const current = items.findIndex((li) => li.contains(document.activeElement));
+    if (current < 0) return;
+    event.preventDefault();
+    const target = items[current + step]?.querySelector<HTMLButtonElement>('button');
+    target?.focus();
+  }
+
+  private columns(): number {
+    const items = [...this.grid.children] as HTMLElement[];
+    const top = items[0]?.offsetTop ?? 0;
+    return Math.max(1, items.filter((li) => li.offsetTop === top).length);
   }
 
   get isOpen(): boolean {

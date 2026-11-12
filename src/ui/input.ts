@@ -10,17 +10,19 @@ import type { Direction } from '../engine/index.ts';
  *     REPEAT_INTERVAL_MS until released. Repeats carry `repeat: true`.
  *   - The browser's own key auto-repeat is ignored (its rate varies by OS).
  *   - Only one held input repeats at a time; the newest press wins.
- *   - Restart never repeats.
+ *   - Restart and menu never repeat.
  */
 export type Command =
   | { readonly type: 'move'; readonly direction: Direction; readonly repeat: boolean }
   | { readonly type: 'undo'; readonly repeat: boolean }
-  | { readonly type: 'restart'; readonly repeat: false };
+  | { readonly type: 'restart'; readonly repeat: false }
+  | { readonly type: 'menu'; readonly repeat: false };
 
 type CommandSpec =
   | { readonly type: 'move'; readonly direction: Direction }
   | { readonly type: 'undo' }
-  | { readonly type: 'restart' };
+  | { readonly type: 'restart' }
+  | { readonly type: 'menu' };
 
 export const REPEAT_DELAY_MS = 260;
 export const REPEAT_INTERVAL_MS = 140;
@@ -39,6 +41,9 @@ const KEY_MAP: Readonly<Record<string, CommandSpec>> = {
   KeyU: { type: 'undo' },
   Backspace: { type: 'undo' },
   KeyR: { type: 'restart' },
+  // Esc opens the menu during play. While a dialog is open, input is paused
+  // and the browser's own Esc handling closes the dialog instead.
+  Escape: { type: 'menu' },
 };
 
 export class InputController {
@@ -119,7 +124,7 @@ export class InputController {
   private press(id: string, spec: CommandSpec): void {
     this.stopRepeat();
     this.emit(spec, false);
-    if (spec.type === 'restart') return;
+    if (spec.type === 'restart' || spec.type === 'menu') return;
     this.held = { id, spec };
     const tick = () => {
       if (this.held && this.enabled) this.emit(this.held.spec, true);
@@ -144,7 +149,7 @@ export class InputController {
   }
 
   private emit(spec: CommandSpec, repeat: boolean): void {
-    if (spec.type === 'restart') this.onCommand({ type: 'restart', repeat: false });
+    if (spec.type === 'restart' || spec.type === 'menu') this.onCommand({ type: spec.type, repeat: false });
     else if (spec.type === 'undo') this.onCommand({ type: 'undo', repeat });
     else this.onCommand({ type: 'move', direction: spec.direction, repeat });
   }

@@ -7,7 +7,7 @@ import {
   type Level,
   type Position,
 } from '../engine/index.ts';
-import type { BoardView } from './BoardView.ts';
+import type { BoardView, TileName } from './BoardView.ts';
 import { createTextures, TEX, TILE } from './textures.ts';
 
 export const MOVE_DURATION_MS = 110;
@@ -98,9 +98,13 @@ export class BoardScene extends Phaser.Scene implements BoardView {
       ...state.crates.map((to, i) => ({ obj: this.crates[i]!, to })),
     ];
 
+    const landed = new Set<Phaser.GameObjects.Image>();
     state.crates.forEach((c, i) => {
       // Texture swaps immediately so the "on goal" symbol is never stale.
-      this.crates[i]!.setTexture(terrainAt(level, c) === 'goal' ? TEX.crateOnGoal : TEX.crate);
+      const crate = this.crates[i]!;
+      const key = terrainAt(level, c) === 'goal' ? TEX.crateOnGoal : TEX.crate;
+      if (key === TEX.crateOnGoal && crate.texture.key !== key) landed.add(crate);
+      crate.setTexture(key);
     });
 
     this.stopMovement();
@@ -108,7 +112,9 @@ export class BoardScene extends Phaser.Scene implements BoardView {
 
     for (const { obj, to } of targets) {
       const { px, py } = toBoard(to);
-      this.tweens.killTweensOf(obj); // also cancels a cosmetic bump
+      // Cancel cosmetic effects (bump, pulse, celebration) and their scale.
+      this.tweens.killTweensOf(obj);
+      obj.setScale(1);
       if (!animate || (obj.x === px && obj.y === py)) {
         obj.setPosition(px, py);
         continue;
@@ -122,12 +128,53 @@ export class BoardScene extends Phaser.Scene implements BoardView {
         onComplete: () => {
           if (generation !== this.generation) return;
           this.moveTweens.delete(tween);
+          if (landed.has(obj)) this.pulse(obj);
           if (this.moveTweens.size === 0) onSettled?.();
         },
       });
       this.moveTweens.add(tween);
     }
     if (this.moveTweens.size === 0) onSettled?.();
+  }
+
+  /**
+   * Win celebration: crates bounce one after another, then the player hops.
+   * Cosmetic only; skipped entirely under reduced motion. `onDone` always runs.
+   */
+  celebrate(onDone: () => void): void {
+    if (this.reducedMotion()) {
+      onDone();
+      return;
+    }
+    const generation = this.generation;
+    const stagger = 90;
+    const targets = [...this.crates, this.player];
+    targets.forEach((obj, i) => {
+      this.tweens.add({
+        targets: obj,
+        scale: obj === this.player ? 1.18 : 1.14,
+        duration: 140,
+        delay: i * stagger,
+        yoyo: true,
+        ease: 'Sine.easeOut',
+      });
+    });
+    const total = (targets.length - 1) * stagger + 280 + 120;
+    this.time.delayedCall(total, () => {
+      // A newer sync (e.g. undo during the celebration) cancels the rest.
+      if (generation === this.generation) onDone();
+    });
+  }
+
+  /** Data URL of a board texture, so the how-to screen shows the real tiles. */
+  tileImage(tile: TileName): string {
+    return this.textures.getBase64(TEX[tile]);
+  }
+
+  /** Small "landed on a goal" pulse. */
+  private pulse(obj: Phaser.GameObjects.Image): void {
+    if (this.reducedMotion()) return;
+    this.tweens.add({ targets: obj, scale: 1.1, duration: 80, yoyo: true, ease: 'Sine.easeOut' });
   }
 
   /** Snap any running movement to its end and forget its callbacks. */

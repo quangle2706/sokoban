@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { App } from './app/App.ts';
+import { SoundPlayer } from './audio/sound.ts';
 import { parseLevelOrThrow } from './engine/index.ts';
 import { LEVELS } from './levels/levels.ts';
 import { BoardScene } from './scenes/BoardScene.ts';
@@ -7,22 +8,29 @@ import type { BoardView } from './scenes/BoardView.ts';
 import { browserStorage, SaveStore } from './storage/saveStore.ts';
 import { byId, Hud } from './ui/hud.ts';
 import { InputController } from './ui/input.ts';
+import { MotionSetting } from './ui/motion.ts';
 import './styles.css';
 
 // Bundled levels are validated by the test suite; parsing here only fails on
 // a broken build, so failing loudly is right.
 const levels = LEVELS.map((def) => ({ def, level: parseLevelOrThrow(def.map) }));
 
-// Reduced motion follows the OS setting for now (a Settings toggle comes in
-// Milestone 3). It only affects animation, never rules.
-const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-const reducedMotion = () => motionQuery.matches;
+// One reduced-motion decision (setting + OS preference) shared by the
+// renderer and CSS. It only affects animation, never rules.
+const motion = new MotionSetting();
+const reducedMotion = () => motion.reduced;
 
 const boardHost = byId('board');
 
 function start(view: BoardView): void {
-  const app = new App(levels, view, new Hud(), new SaveStore(browserStorage()));
-  const input = new InputController((command) => app.gameController.handle(command), document.body);
+  const app = new App(levels, {
+    view,
+    hud: new Hud(),
+    store: new SaveStore(browserStorage()),
+    sound: new SoundPlayer(false), // enabled from saved settings by App
+    motion,
+  });
+  const input = new InputController((command) => app.handleCommand(command), document.body);
   app.attachInput(input);
   app.start();
 

@@ -102,12 +102,44 @@ snaps without animation and clears the queue.
 
 ## Screens
 
-The completion overlay and the level picker are both native modal
-`<dialog>`s, which gives focus trapping, Esc to close and an inert
-background. `App.updatePause()` pauses gameplay input whenever either is
-open. While paused, the key handler returns *before* `preventDefault`, so
-keys behave normally in dialogs. Locked levels are plain list items, not
-disabled buttons, so the picker has no button that does nothing.
+Every screen besides gameplay is a native modal `<dialog>`:
+
+| Dialog | Opened from | Notes |
+| ------ | ----------- | ----- |
+| `home` | launch, Menu button, Esc in game | "Chơi tiếp" goes to the loaded level, or the next one if it is solved |
+| `level-select` | Home, completion | arrow keys move between cards |
+| `howto` | Home | the legend uses `view.tileImage()`, so it shows the real tiles |
+| `settings` | Home | sound, motion, reset progress |
+| `confirm-reset` | Settings | focus starts on "Hủy" |
+| `completion` | a win | shown after the celebration |
+
+Opening a dialog on top of another forms a back stack for free: Esc or
+"Quay lại" closes the top one, and focus returns to the button that opened
+it. One rule, `App.updatePause()`, pauses gameplay whenever *any* dialog is
+open. While paused, the key handler returns before `preventDefault`, so keys
+behave normally inside dialogs. Locked levels are plain list items, not
+disabled buttons, so no screen has a button that does nothing.
+
+## Feedback: sound and motion
+
+- `GameController` emits `GameFeedback` events (`step`, `push`, `goal`,
+  `blocked`, `undo`, `restart`, `win`) through a hook. `App` forwards them
+  to `SoundPlayer`. The controller knows nothing about audio, and a
+  different feedback channel (vibration, captions) could listen to the same
+  events.
+- `SoundPlayer` synthesizes each sound from short oscillator envelopes. The
+  `AudioContext` is created on the first key press or tap, because browsers
+  block audio before a user gesture. If Web Audio is missing, every call
+  does nothing. Blocked-move sounds only play on fresh presses, never while
+  a key is held against a wall.
+- `MotionSetting` turns the preference (`system`, `reduce` or `full`) plus
+  the OS `prefers-reduced-motion` into one boolean. That flag drives both
+  the Phaser renderer (glides, bump, goal pulse, win celebration) and CSS,
+  through `<html data-reduced-motion>`. Rules and the command path are
+  identical either way.
+- On a win: glide → `win` sound → `view.celebrate()` → completion dialog.
+  If the player undoes during the celebration, `sync()` cancels it and the
+  dialog is not shown.
 
 ## Rendering (`src/scenes`)
 

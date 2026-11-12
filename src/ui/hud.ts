@@ -9,11 +9,18 @@ export class Hud {
   private readonly notice = byId('notice');
   private readonly announcer = byId('announcer');
   private noticeTimer: number | undefined;
+  private boardLabel = '';
 
   setLevel(number: number, name: string): void {
     byId('level-number').textContent = TEXT.levelNumber(number);
     byId('level-name').textContent = name;
-    byId('board').setAttribute('aria-label', TEXT.boardLabel(number, name));
+    this.boardLabel = TEXT.boardLabel(number, name);
+    byId('board').setAttribute('aria-label', this.boardLabel);
+  }
+
+  /** Text alternative for the canvas, e.g. "Bàn chơi màn 2: Hai bên. 1 trên 2 thùng đã vào chỗ." */
+  setBoardSummary(summary: string): void {
+    byId('board').setAttribute('aria-label', `${this.boardLabel}. ${summary}`);
   }
 
   update(state: GameState): void {

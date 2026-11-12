@@ -27,6 +27,17 @@ export const TEXT = {
   cardLabel: (n: number, name: string, detail: string) => `Màn ${n}, ${name}. ${detail}`,
   lockedLabel: (n: number, previous: number) => `Màn ${n}, đang khóa. Hoàn thành màn ${previous} để mở khóa.`,
 
+  goalsFilled: (filled: number, total: number) => `${filled} trên ${total} thùng đã vào chỗ.`,
+
+  // Home
+  homeContinueDetail: (n: number, name: string) => `Màn ${n} · ${name}`,
+  homeProgress: (done: number, total: number) => `Đã hoàn thành ${done}/${total} màn · lưu trên trình duyệt này`,
+
+  // Settings
+  motionSystemReduced: 'Thiết bị của bạn hiện đang yêu cầu giảm chuyển động.',
+  motionSystemFull: 'Thiết bị của bạn hiện không yêu cầu giảm chuyển động.',
+  resetDone: 'Đã xóa tiến trình. Bắt đầu lại từ màn 1.',
+
   // Notices
   saveReset: 'Không đọc được dữ liệu đã lưu nên tiến trình được bắt đầu lại.',
   saveRepaired: 'Một phần dữ liệu đã lưu bị lỗi và đã được bỏ qua.',

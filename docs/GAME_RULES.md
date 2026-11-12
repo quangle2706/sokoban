@@ -132,3 +132,7 @@ solution need not achieve both (e.g. Đối xứng: 38 moves uses 10 pushes;
   first open unfinished level is used instead.
 - Progress lives only in this browser on this device. There is no account
   and no sync.
+- **Settings** (sound, motion) are saved with progress. **Reset progress**
+  (Settings, with confirmation) clears completions, bests and unfinished
+  runs, but keeps settings. Saves from before settings existed load with
+  the defaults: sound on, motion following the device.

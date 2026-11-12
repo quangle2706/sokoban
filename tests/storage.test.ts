@@ -6,10 +6,12 @@ import {
   levelStatus,
   recordCompletion,
   recordRun,
+  resetProgress,
   resumeGame,
   startingLevelIndex,
+  updateSettings,
 } from '../src/storage/progress.ts';
-import { emptySave, parseSave, serializeSave, type SaveData } from '../src/storage/saveData.ts';
+import { DEFAULT_SETTINGS, emptySave, parseSave, serializeSave, type SaveData } from '../src/storage/saveData.ts';
 import { BACKUP_KEY, SAVE_KEY, SaveStore, type KeyValueStore } from '../src/storage/saveStore.ts';
 
 const IDS = ['one', 'two', 'three'];
@@ -171,6 +173,43 @@ describe('save data validation', () => {
     const r = parseSave(raw);
     expect(r.status).toBe('repaired');
     expect(r.data).toEqual(save({ completed: { one: { moves: 9, pushes: 3 } }, inProgress: { one: 'uRd' } }));
+  });
+});
+
+describe('settings', () => {
+  it('defaults when a version-1 save has no settings (pre-Milestone-3 saves)', () => {
+    const raw = JSON.stringify({ version: 1, completed: { one: { moves: 9, pushes: 3 } }, inProgress: {}, currentLevelId: 'one' });
+    const r = parseSave(raw);
+    expect(r.status).toBe('loaded');
+    expect(r.data.settings).toEqual(DEFAULT_SETTINGS);
+    expect(r.data.completed.one).toEqual({ moves: 9, pushes: 3 });
+  });
+
+  it('round-trips settings and repairs invalid fields individually', () => {
+    const data = save({ settings: { sound: false, motion: 'reduce' } });
+    expect(parseSave(serializeSave(data))).toEqual({ data, status: 'loaded' });
+
+    const bad = parseSave(JSON.stringify({ version: 1, settings: { sound: 'yes', motion: 'full' } }));
+    expect(bad.status).toBe('repaired');
+    expect(bad.data.settings).toEqual({ sound: true, motion: 'full' });
+    expect(parseSave(JSON.stringify({ version: 1, settings: 5 })).data.settings).toEqual(DEFAULT_SETTINGS);
+  });
+
+  it('updates settings without touching progress', () => {
+    const s = save({ completed: { one: { moves: 5, pushes: 2 } } });
+    const next = updateSettings(s, { sound: false });
+    expect(next.settings).toEqual({ sound: false, motion: 'system' });
+    expect(next.completed).toBe(s.completed);
+  });
+
+  it('reset progress clears everything except settings', () => {
+    const s = save({
+      completed: { one: { moves: 5, pushes: 2 } },
+      inProgress: { two: 'uu' },
+      currentLevelId: 'two',
+      settings: { sound: false, motion: 'reduce' },
+    });
+    expect(resetProgress(s)).toEqual(save({ settings: { sound: false, motion: 'reduce' } }));
   });
 });
 

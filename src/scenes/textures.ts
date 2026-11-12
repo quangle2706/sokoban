@@ -134,8 +134,11 @@ function drawCrate(g: Phaser.GameObjects.Graphics, onGoal: boolean): void {
   g.fillRect(inset + 8, inset + 5, size - 16, 4);
 
   if (onGoal) {
-    // Golden outer ring + check badge: distinct by symbol, not only colour.
-    g.lineStyle(6, C.goal, 1);
+    // Golden outer ring with a dark edge (so it reads against the floor)
+    // + check badge: distinct by symbol, not only colour.
+    g.lineStyle(11, C.goalDark, 1);
+    g.strokeRoundedRect(inset - 7, inset - 7, size + 14, size + 14, 18);
+    g.lineStyle(5, C.goal, 1);
     g.strokeRoundedRect(inset - 7, inset - 7, size + 14, size + 14, 18);
     const c = TILE / 2;
     g.fillStyle(C.page, 1);

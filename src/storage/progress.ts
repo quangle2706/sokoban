@@ -3,7 +3,7 @@
  * Every function returns a new SaveData and never mutates its input.
  */
 import { replaySolution, type Game, type Level } from '../engine/index.ts';
-import type { BestRun, SaveData } from './saveData.ts';
+import { emptySave, type BestRun, type SaveData, type Settings } from './saveData.ts';
 
 export type LevelStatus = 'locked' | 'available' | 'in-progress' | 'completed';
 
@@ -106,4 +106,13 @@ export function startingLevelIndex(save: SaveData, levelIds: readonly string[]):
   if (current >= 0 && isUnlocked(save, levelIds, current)) return current;
   const firstOpen = levelIds.findIndex((id, i) => isUnlocked(save, levelIds, i) && !(id in save.completed));
   return firstOpen >= 0 ? firstOpen : 0;
+}
+
+/** Forget all progress (completions, bests, unfinished runs); keep settings. */
+export function resetProgress(save: SaveData): SaveData {
+  return { ...emptySave(), settings: save.settings };
+}
+
+export function updateSettings(save: SaveData, change: Partial<Settings>): SaveData {
+  return { ...save, settings: { ...save.settings, ...change } };
 }

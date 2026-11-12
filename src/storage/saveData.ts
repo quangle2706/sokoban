@@ -6,6 +6,8 @@
  *   - inProgress:     levelId -> LURD notation of the unfinished run, replayed
  *                     through the engine on load (which re-validates it)
  *   - currentLevelId: the level to reopen on launch
+ *   - settings:       sound and motion preferences (optional in stored data;
+ *                     saves written before Milestone 3 get the defaults)
  *
  * Saves live in this browser only; nothing is synced across devices.
  */
@@ -21,11 +23,22 @@ export interface BestRun {
   readonly pushes: number;
 }
 
+/** 'system' follows the OS prefers-reduced-motion setting. */
+export type MotionPreference = 'system' | 'reduce' | 'full';
+
+export interface Settings {
+  readonly sound: boolean;
+  readonly motion: MotionPreference;
+}
+
+export const DEFAULT_SETTINGS: Settings = Object.freeze({ sound: true, motion: 'system' });
+
 export interface SaveData {
   readonly version: typeof SAVE_VERSION;
   readonly completed: Readonly<Record<string, BestRun>>;
   readonly inProgress: Readonly<Record<string, string>>;
   readonly currentLevelId: string | null;
+  readonly settings: Settings;
 }
 
 /**
@@ -42,7 +55,7 @@ export interface LoadOutcome {
 }
 
 export function emptySave(): SaveData {
-  return { version: SAVE_VERSION, completed: {}, inProgress: {}, currentLevelId: null };
+  return { version: SAVE_VERSION, completed: {}, inProgress: {}, currentLevelId: null, settings: DEFAULT_SETTINGS };
 }
 
 export function serializeSave(data: SaveData): string {
@@ -87,8 +100,22 @@ export function parseSave(raw: string | null): LoadOutcome {
     currentLevelId = value.currentLevelId;
   } else if (value.currentLevelId !== null && value.currentLevelId !== undefined) dropped = true;
 
+  // Settings were added after version 1 shipped: missing means defaults (not
+  // an error); each invalid field falls back to its default on its own.
+  let settings: Settings = DEFAULT_SETTINGS;
+  if (isRecord(value.settings)) {
+    const { sound, motion } = value.settings;
+    const validSound = typeof sound === 'boolean';
+    const validMotion = motion === 'system' || motion === 'reduce' || motion === 'full';
+    if (!validSound || !validMotion) dropped = true;
+    settings = {
+      sound: validSound ? sound : DEFAULT_SETTINGS.sound,
+      motion: validMotion ? motion : DEFAULT_SETTINGS.motion,
+    };
+  } else if (value.settings !== undefined) dropped = true;
+
   return {
-    data: { version: SAVE_VERSION, completed, inProgress, currentLevelId },
+    data: { version: SAVE_VERSION, completed, inProgress, currentLevelId, settings },
     status: dropped ? 'repaired' : 'loaded',
   };
 }
