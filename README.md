@@ -7,7 +7,7 @@ Push every crate onto a goal. All player-facing text is Vietnamese.
 Pages automatically from `main`; see [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md).
 
 **Status: Milestone 4 (MVP complete).**
-- Ten original levels with verified solutions.
+- Thirty original levels, each with a verified solution.
 - Home screen, level picker with unlocks, how-to page, and settings for
   sound, reduced motion and resetting progress.
 - Sound effects are synthesized in the browser, with no audio files.

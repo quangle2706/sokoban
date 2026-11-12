@@ -129,11 +129,25 @@ describe('runs and resume', () => {
     expect(resumeGame(level, undefined)).toBeNull();
   });
 
+  it('continues to newly added levels after finishing the old last level', () => {
+    // A save from when 'two' was the last level: finishing it left current = 'two'.
+    const oldIds = ['one', 'two'];
+    let s = recordCompletion(save(), 'one', { moves: 1, pushes: 1 }, 'two').save;
+    s = recordCompletion(s, 'two', { moves: 1, pushes: 1 }, null).save;
+    expect(s.currentLevelId).toBe('two');
+    expect(startingLevelIndex(s, oldIds)).toBe(0); // all done: falls back to the first level
+    // After an update adds 'three', the game opens the new level.
+    expect(startingLevelIndex(s, [...oldIds, 'three'])).toBe(2);
+  });
+
   it('chooses the starting level', () => {
     expect(startingLevelIndex(save(), IDS)).toBe(0);
     const s = save({ completed: { one: { moves: 1, pushes: 1 } } });
     expect(startingLevelIndex(s, IDS)).toBe(1); // first open, unfinished level
-    expect(startingLevelIndex({ ...s, currentLevelId: 'one' }, IDS)).toBe(0);
+    // A finished current level with nothing in progress moves on to the next open one…
+    expect(startingLevelIndex({ ...s, currentLevelId: 'one' }, IDS)).toBe(1);
+    // …but a replay in progress on it is resumed.
+    expect(startingLevelIndex({ ...s, currentLevelId: 'one', inProgress: { one: 'u' } }, IDS)).toBe(0);
     expect(startingLevelIndex({ ...s, currentLevelId: 'three' }, IDS)).toBe(1); // locked -> ignored
     expect(startingLevelIndex({ ...s, currentLevelId: 'gone' }, IDS)).toBe(1); // unknown id
   });

@@ -44,7 +44,11 @@ Still to do (needs the repository owner or a device):
   without Phaser at all. The board is simple shapes and tweens, which a
   plain `<canvas>` renderer behind the existing `BoardView` interface could
   handle in a few kB.
-- **More content:** more levels, with `scripts/solve.ts` proving each one.
+- **More content:** levels 11–30 were added after the MVP. Further levels
+  should follow the same process: draft by hand, prove with
+  `scripts/solve.ts`, and add the solution to `tests/fixtures/solutions.ts`.
+  On a 320 px phone the widest boards (11 columns) get about 25 px tiles,
+  so 11×11 is a sensible size limit.
 - **Undoable restart** (exercise from Milestone 1) and a move-history replay
   of your best run.
 - **Deadlock hints** (optional): gently mark crates that can no longer reach

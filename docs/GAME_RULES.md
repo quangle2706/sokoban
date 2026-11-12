@@ -94,11 +94,13 @@ shown separately by replaying an author solution (below).
   solution needs). The test checks the replay never uses fewer pushes than
   `minPushes`. Re-run the solver after editing a map.
 
-## The ten levels
+## The thirty levels
 
 All original designs. Difficulty is ordered by how many states the
 move-optimal search had to explore, a rough proxy for how much planning a
-level needs.
+level needs. Levels 11–30 were added after the MVP. They restart a little
+easier than level 10 (as a breather) and then climb to the hardest levels
+in the game.
 
 | # | id          | Name          | Crates | Fewest moves | Fewest pushes | States searched |
 | - | ----------- | ------------- | ------ | ------------ | ------------- | --------------- |
@@ -112,6 +114,32 @@ level needs.
 | 8 | bac-thang   | Bậc thang     | 4 | 50 | 11 | 233,475 |
 | 9 | doi-xung    | Đối xứng      | 4 | 38 | 8  | 503,406 |
 | 10 | goc-kho    | Góc kho       | 4 | 51 | 15 | 611,213 |
+| 11 | bang-chuyen | Băng chuyền | 3 | 39 | 12 | 20,444 |
+| 12 | cua-sau | Cửa sau | 3 | 33 | 6 | 54,095 |
+| 13 | hai-day-ke | Hai dãy kệ | 4 | 30 | 6 | 98,144 |
+| 14 | chu-u | Chữ U | 4 | 34 | 8 | 110,775 |
+| 15 | nga-tu | Ngã tư | 4 | 24 | 6 | 150,521 |
+| 16 | gac-xep | Gác xép | 4 | 38 | 12 | 160,060 |
+| 17 | thap-hang | Tháp hàng | 4 | 33 | 15 | 230,753 |
+| 18 | ban-co | Bàn cờ | 4 | 43 | 16 | 344,848 |
+| 19 | loi-vong | Lối vòng | 4 | 59 | 11 | 434,163 |
+| 20 | hang-rao | Hàng rào | 4 | 32 | 8 | 490,133 |
+| 21 | hai-tang | Hai tầng | 4 | 54 | 11 | 575,514 |
+| 22 | bac-cua | Bậc cửa | 4 | 30 | 7 | 644,751 |
+| 23 | chia-doi | Chia đôi | 4 | 42 | 10 | 729,733 |
+| 24 | goc-khuat | Góc khuất | 4 | 46 | 13 | 967,811 |
+| 25 | me-cung-nho | Mê cung nhỏ | 4 | 78 | 21 | 2,389,572 |
+| 26 | kho-dong | Kho phía đông | 4 | 91 | 26 | 3,101,596 |
+| 27 | cot-tru | Cột trụ | 5 | ≤ 56* | 8 | 30,606 (push) |
+| 28 | day-kho-dai | Dãy kho dài | 5 | ≤ 97* | 17 | 31,383 (push) |
+| 29 | ngo-cut | Ngõ cụt | 5 | ≤ 102* | 16 | 46,605 (push) |
+| 30 | tong-kho | Tổng kho | 5 | ≤ 204* | 32 | 138,281 (push) |
+
+\* For the four 5-crate levels (27–30) the move-optimal search did not
+finish within 5 million states, so the stored solution comes from the
+push-optimal search. Its move count is an upper bound, not the minimum, and
+"states searched" is the push search's count, which is not comparable to
+the move search numbers. The minimum push counts are still proven.
 
 "Fewest moves" and "fewest pushes" come from two separate searches, so one
 solution need not achieve both (e.g. Đối xứng: 38 moves uses 10 pushes;

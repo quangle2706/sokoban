@@ -42,4 +42,105 @@ export const SOLUTIONS: Readonly<Record<string, AuthorSolution>> = {
     moveOptimal: true,
     minPushes: 15,
   },
+  // --- Levels 11-30 ---
+  'bang-chuyen': {
+    moves: 'rrrruruullLDlDldRRRlluuruulDDDldRRluurD',
+    moveOptimal: true,
+    minPushes: 12,
+  },
+  'cua-sau': {
+    moves: 'lluRuruurrDrdddlllUUUddllluurRuRD',
+    moveOptimal: true,
+    minPushes: 6,
+  },
+  'hai-day-ke': {
+    moves: 'lUluRRRRDrdLLLLuuluurDurrrDrDD',
+    moveOptimal: true,
+    minPushes: 6,
+  },
+  'chu-u': {
+    moves: 'lLLLLuuuurDldRRRUruLddllllldRldRRU',
+    moveOptimal: true,
+    minPushes: 8,
+  },
+  'nga-tu': {
+    moves: 'ddlUluuRuRDDrruLrruullDD',
+    moveOptimal: true,
+    minPushes: 6,
+  },
+  'gac-xep': {
+    moves: 'rUrrruululDDLLrrurrddlLdlUruLruuULulDD',
+    moveOptimal: true,
+    minPushes: 12,
+  },
+  'thap-hang': {
+    moves: 'LdlUUUluRddRdrUUddRdrUUUruLddLdlU',
+    moveOptimal: true,
+    minPushes: 15,
+  },
+  'ban-co': {
+    moves: 'LdlUUUddrruuRurDDDuullLuLDDDrdLurrRdRUUUluR',
+    moveOptimal: true,
+    minPushes: 16,
+  },
+  'loi-vong': {
+    moves: 'uuurDullUllddrRdrUrrruuluulllDDDullddrRuRDrrruulLLrruullldD',
+    moveOptimal: true,
+    minPushes: 11,
+  },
+  'hang-rao': {
+    moves: 'llluRdrUrrRdrUlluuurrdLulDllLulD',
+    moveOptimal: true,
+    minPushes: 8,
+  },
+  'hai-tang': {
+    moves: 'ruruuuulldRRlllddLLrruulullddDrrrrRRurDuluurDlllllLulD',
+    moveOptimal: true,
+    minPushes: 11,
+  },
+  'bac-cua': {
+    moves: 'rruLulLruuullddDuuulldRurDRurD',
+    moveOptimal: true,
+    minPushes: 7,
+  },
+  'chia-doi': {
+    moves: 'ulUUrruurDldDullddrRuulllluurDurDDDurrddlL',
+    moveOptimal: true,
+    minPushes: 10,
+  },
+  'goc-khuat': {
+    moves: 'uLLuuLdDLdlluuUluRRdldddrrurrdLuuuLLullddrUluR',
+    moveOptimal: true,
+    minPushes: 13,
+  },
+  'me-cung-nho': {
+    moves: 'uuluurrurDDulllddllddRRlluuluuRRRddrdDrdLrrruLLrruuLLLLuuRRurDDulllddrdDrrruuL',
+    moveOptimal: true,
+    minPushes: 21,
+  },
+  'kho-dong': {
+    moves: 'luRRuuuullDDDuuurrddrrdrddlUruulllddRRUrrdLdlUllldlluRRRRRdrUUdllllluuuRurDDDuulldddrRRRdrU',
+    moveOptimal: true,
+    minPushes: 26,
+  },
+  'cot-tru': {
+    moves: 'llluuluurDurrrrrddlUruLLrddlllDurrrddlUdddlluluururRddlD',
+    moveOptimal: false,
+    minPushes: 8,
+  },
+  'day-kho-dai': {
+    moves: 'uluuurrdLulDllulldRRRRDuurrdLulDllllddddrrrruruLddlluulluurrrrDullllddddrUdrrruLdlUlluuuulldRurDD',
+    moveOptimal: false,
+    minPushes: 17,
+  },
+  'ngo-cut': {
+    moves: 'ururruulLulDrrrRlddrruUddllllddllluurRRRRuulllDurrrddllddllluurRRluurrrddRluulllddlldRurrdRdllluRdrruR',
+    moveOptimal: false,
+    minPushes: 16,
+  },
+  'tong-kho': {
+    moves: 'lluuullullDRurDrrurrDLulDlddddllluuUluRurrdDuulldRlddddrruruuurDlddrrruUruLLrdddllluulDrddllluuuuurrDrdrDlddrruruuuullDDldlDuruulDDrddrruLrruuulldDuurrddddlllUUddrruLdlUruuullllddddrRlluuuurrddDuuulldddRR',
+    moveOptimal: false,
+    minPushes: 32,
+  },
 };

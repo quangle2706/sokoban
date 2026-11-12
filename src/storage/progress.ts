@@ -100,10 +100,22 @@ export function resumeGame(level: Level, notation: string | undefined): Game | n
   return result.ok && !result.solved ? result.game : null;
 }
 
-/** Which level to open on launch. */
+/**
+ * Which level to open on launch: the saved current level while it still has
+ * something to do (unfinished, or a run in progress); otherwise the first
+ * open level that is not finished yet. The second rule matters when new
+ * levels are added after a player finished the old last one.
+ */
 export function startingLevelIndex(save: SaveData, levelIds: readonly string[]): number {
   const current = save.currentLevelId === null ? -1 : levelIds.indexOf(save.currentLevelId);
-  if (current >= 0 && isUnlocked(save, levelIds, current)) return current;
+  const currentId = levelIds[current];
+  if (
+    currentId !== undefined &&
+    isUnlocked(save, levelIds, current) &&
+    (!(currentId in save.completed) || currentId in save.inProgress)
+  ) {
+    return current;
+  }
   const firstOpen = levelIds.findIndex((id, i) => isUnlocked(save, levelIds, i) && !(id in save.completed));
   return firstOpen >= 0 ? firstOpen : 0;
 }

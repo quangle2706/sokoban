@@ -98,9 +98,9 @@ describe('solution notation', () => {
 });
 
 describe('bundled levels', () => {
-  it('has ten levels with unique, slug-shaped ids', () => {
+  it('has thirty levels with unique, slug-shaped ids', () => {
     const ids = LEVELS.map((l) => l.id);
-    expect(ids).toHaveLength(10);
+    expect(ids).toHaveLength(30);
     expect(new Set(ids).size).toBe(ids.length);
     for (const id of ids) expect(id).toMatch(/^[a-z0-9-]+$/);
   });
